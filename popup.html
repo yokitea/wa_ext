@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 15px;
+      width: 320px;
+      background-color: #f0f2f5;
+      color: #333;
+    }
+    h3 {
+      margin-top: 0;
+      color: #008069; /* WA Green */
+      font-size: 16px;
+      border-bottom: 2px solid #005a4e;
+      padding-bottom: 8px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .setting-group {
+      margin-bottom: 15px;
+      background: white;
+      padding: 12px;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .setting-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .setting-row:last-child {
+      margin-bottom: 0;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 500;
+    }
+    select {
+      padding: 5px 8px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+      font-size: 12px;
+      background-color: #fff;
+      max-width: 130px;
+    }
+    /* Switch styling */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 36px;
+      height: 20px;
+    }
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      transition: .3s;
+      border-radius: 20px;
+    }
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px;
+      width: 14px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .3s;
+      border-radius: 50%;
+    }
+    input:checked + .slider {
+      background-color: #008069;
+    }
+    input:checked + .slider:before {
+      transform: translateX(16px);
+    }
+    
+    /* Manage Section Toggle Button */
+    .btn-toggle-manage {
+      background: none;
+      border: none;
+      color: #008069;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 0;
+      text-decoration: underline;
+    }
+    
+    /* Manage Section */
+    .manage-section {
+      display: none;
+      border-top: 1px dashed #ccc;
+      margin-top: 10px;
+      padding-top: 10px;
+      font-size: 12px;
+    }
+    .manage-section.active {
+      display: block;
+    }
+    .manage-title {
+      font-weight: bold;
+      color: #005a4e;
+      margin-bottom: 8px;
+    }
+    .badge-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-bottom: 10px;
+    }
+    .item-badge {
+      background-color: #e1f5fe;
+      color: #0288d1;
+      padding: 3px 8px;
+      border-radius: 12px;
+      font-size: 11px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid #b3e5fc;
+    }
+    .item-badge button {
+      background: none;
+      border: none;
+      color: #d32f2f;
+      cursor: pointer;
+      font-weight: bold;
+      padding: 0;
+      font-size: 11px;
+    }
+    .add-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    .add-row input, .add-row select {
+      flex: 1;
+      padding: 4px 6px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 11px;
+    }
+    .btn-add {
+      background-color: #008069;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: bold;
+    }
+    .btn-add:hover {
+      background-color: #005a4e;
+    }
+
+    .footer {
+      font-size: 10px;
+      text-align: center;
+      color: #666;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h3>
+    <span>WA Web Helper</span>
+    <button class="btn-toggle-manage" id="toggle-manage">Kelola Daftar ⚙️</button>
+  </h3>
+  
+  <!-- Main Settings -->
+  <div class="setting-group">
+    <div class="setting-row">
+      <label for="enable-currency">Konversi Mata Uang</label>
+      <label class="switch">
+        <input type="checkbox" id="enable-currency" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <label for="target-currency">Target Mata Uang</label>
+      <select id="target-currency">
+        <!-- Will be loaded dynamically -->
+      </select>
+    </div>
+  </div>
+
+  <div class="setting-group">
+    <div class="setting-row">
+      <label for="enable-translation">Terjemahan Pesan</label>
+      <label class="switch">
+        <input type="checkbox" id="enable-translation" checked>
+        <span class="slider"></span>
+      </label>
+    </div>
+    <div class="setting-row">
+      <label for="target-lang">Target Bahasa</label>
+      <select id="target-lang">
+        <!-- Will be loaded dynamically -->
+      </select>
+    </div>
+  </div>
+
+  <!-- Manage Lists Panel -->
+  <div class="setting-group manage-section" id="manage-panel">
+    
+    <!-- Manage Currencies -->
+    <div class="manage-title">Kelola Mata Uang Pilihan</div>
+    <div class="badge-container" id="currency-badges">
+      <!-- Loaded dynamically -->
+    </div>
+    <div class="add-row">
+      <input type="text" id="new-currency-input" placeholder="Contoh: EUR, JPY, GBP" maxlength="3" style="text-transform: uppercase;">
+      <button class="btn-add" id="btn-add-currency">Tambah</button>
+    </div>
+
+    <!-- Manage Languages -->
+    <div class="manage-title" style="margin-top: 12px;">Kelola Bahasa Pilihan</div>
+    <div class="badge-container" id="lang-badges">
+      <!-- Loaded dynamically -->
+    </div>
+    <div class="add-row">
+      <select id="new-lang-select">
+        <option value="">-- Pilih Bahasa --</option>
+        <option value="su">Sunda</option>
+        <option value="ms">Melayu</option>
+        <option value="ja">Jepang</option>
+        <option value="ko">Korea</option>
+        <option value="zh">Mandarin</option>
+        <option value="ar">Arab</option>
+        <option value="es">Spanyol</option>
+        <option value="fr">Prancis</option>
+        <option value="de">Jerman</option>
+        <option value="ru">Rusia</option>
+        <option value="th">Thailand</option>
+        <option value="vi">Vietnam</option>
+        <option value="hi">Hindi</option>
+        <option value="pt">Portugis</option>
+        <option value="it">Italia</option>
+        <option value="nl">Belanda</option>
+      </select>
+      <button class="btn-add" id="btn-add-lang">Tambah</button>
+    </div>
+  </div>
+
+  <div class="footer">
+    WhatsApp Web Helper v1.1 • Super Customizable
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
