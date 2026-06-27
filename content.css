@@ -107,20 +107,21 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
   border-radius: 10px !important;
   margin: 8px 0 !important;
   border-left: 4px solid #43a047 !important;
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-family: 'Courier New', Courier, monospace !important;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-  max-width: 95% !important;
+  max-width: 98% !important;
   box-sizing: border-box !important;
   display: block !important;
   color: #333333 !important;
   clear: both;
+  overflow-x: auto !important; /* Scroll if calculation overflows */
 }
 
 .wa-helper-deal-title {
   font-weight: bold !important;
   color: #2e7d32 !important;
-  font-size: 11.5px !important;
+  font-size: 11px !important;
   margin-bottom: 6px !important;
   border-bottom: 1px dashed rgba(0,0,0,0.1) !important;
   padding-bottom: 4px !important;
@@ -130,14 +131,19 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
 .wa-helper-deal-row {
   display: flex !important;
   justify-content: space-between !important;
-  margin-bottom: 3px !important;
+  margin-bottom: 4px !important;
   line-height: 1.4 !important;
+  gap: 12px !important;
+}
+
+.wa-helper-deal-row span {
+  white-space: nowrap !important; /* Prevent awkward wrapping inside table columns */
 }
 
 .wa-helper-deal-row.total {
   font-weight: bold !important;
   color: #2e7d32 !important;
-  font-size: 13.5px !important;
+  font-size: 13px !important;
   border-top: 1px solid rgba(0,0,0,0.08) !important;
   margin-top: 4px !important;
   padding-top: 4px !important;
@@ -151,6 +157,47 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
 .wa-helper-deal-row.converted {
   color: #1565c0 !important;
   font-weight: 600 !important;
+}
+
+/* ==========================================
+   DARK MODE SUPPORT FOR WHATSAPP WEB
+   ========================================== */
+
+/* Dark Mode: Deal Calculator */
+.theme-dark .wa-helper-deal-calc {
+  background: #1f2c24 !important; /* Dark Greenish/Grey */
+  border-left: 4px solid #00a884 !important; /* WA Dark Green */
+  color: #e9edef !important; /* Light text */
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4) !important;
+}
+
+.theme-dark .wa-helper-deal-title {
+  color: #00a884 !important;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.15) !important;
+}
+
+.theme-dark .wa-helper-deal-row.total {
+  color: #00a884 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.theme-dark .wa-helper-deal-row.discount {
+  color: #ff8a80 !important; /* Light red for discount */
+}
+
+.theme-dark .wa-helper-deal-row.converted {
+  color: #64b5f6 !important; /* Light blue for conversion */
+}
+
+/* Dark Mode: Translation Text block */
+.theme-dark .wa-helper-translated {
+  color: #8696a0 !important; /* WA Dark meta color */
+  background-color: rgba(255, 255, 255, 0.04) !important;
+  border-left: 3px solid #00a884 !important;
+}
+
+.theme-dark .wa-helper-divider {
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
 }
 
 @keyframes fadeInWA {

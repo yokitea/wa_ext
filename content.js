@@ -68,6 +68,10 @@ function formatCurrency(amount, currencyCode) {
     return new Intl.NumberFormat('en-SG', { style: 'currency', currency: 'SGD' }).format(amount);
   } else if (currencyCode === 'CNY') {
     return new Intl.NumberFormat('zh-CN', { style: 'currency', currency: 'CNY' }).format(amount);
+  } else if (currencyCode === 'JPY') {
+    return new Intl.NumberFormat('ja-JP', { style: 'currency', currency: 'JPY', maximumFractionDigits: 0 }).format(amount);
+  } else if (currencyCode === 'EUR') {
+    return new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(amount);
   }
   return `${amount.toFixed(2)} ${currencyCode}`;
 }
