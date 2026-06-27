@@ -295,7 +295,7 @@ function processMessageElement(messageElement) {
   if (dealResult) {
     // 1. Handle Deal Calculator Rendering
     const badge = document.createElement('div');
-    badge.className = 'wa-helper-deal-calc';
+    badge.className = 'wa-helper-deal-calc collapsed';
     
     const formattedPrice = formatCurrency(dealResult.price, dealResult.currencyCode);
     const formattedSubtotal = formatCurrency(dealResult.subtotal, dealResult.currencyCode);
@@ -303,8 +303,12 @@ function processMessageElement(messageElement) {
     const formattedPerUnit = formatCurrency(dealResult.pricePerUnit, dealResult.currencyCode);
     
     let badgeHTML = `
-      <div class="wa-helper-deal-title">📊 SMART DEAL CALCULATOR</div>
-      <div class="wa-helper-deal-row"><span>🛒 Qty × Harga:</span> <span>${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}</span></div>
+      <div class="wa-helper-deal-title">
+        <span>📊 Lihat Kalkulasi Deal</span>
+        <span class="wa-helper-deal-toggle-icon">▼</span>
+      </div>
+      <div class="wa-helper-deal-body" style="display: none; padding-top: 6px;">
+        <div class="wa-helper-deal-row"><span>🛒 Qty × Harga:</span> <span>${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}</span></div>
     `;
     
     if (dealResult.discountAmount > 0) {
@@ -318,8 +322,8 @@ function processMessageElement(messageElement) {
     }
     
     badgeHTML += `
-      <div class="wa-helper-deal-row total"><span>💰 Total:</span> <span>${formattedTotal}</span></div>
-      <div class="wa-helper-deal-row"><span>💳 Per pcs:</span> <span>${formattedPerUnit}</span></div>
+        <div class="wa-helper-deal-row total"><span>💰 Total:</span> <span>${formattedTotal}</span></div>
+        <div class="wa-helper-deal-row"><span>💳 Per pcs:</span> <span>${formattedPerUnit}</span></div>
     `;
     
     if (dealResult.convertedTotal) {
@@ -340,12 +344,36 @@ function processMessageElement(messageElement) {
       (dealResult.convertedTotal ? `\n\nKonversi (${settings.targetCurrency}):\n🔄 Total: ${dealResult.convertedTotal}\n🔄 Per pcs: ${dealResult.convertedPerUnit}` : '');
       
     badgeHTML += `
-      <div style="text-align: right; margin-top: 8px;">
-        <button class="wa-helper-copy-btn" data-copy="${encodeURIComponent(copyData)}">📋 Salin</button>
+        <div style="text-align: right; margin-top: 8px;">
+          <button class="wa-helper-copy-btn" data-copy="${encodeURIComponent(copyData)}">📋 Salin</button>
+        </div>
       </div>
     `;
     
     badge.innerHTML = badgeHTML;
+    
+    // Toggle Event Listener
+    const titleEl = badge.querySelector('.wa-helper-deal-title');
+    const bodyEl = badge.querySelector('.wa-helper-deal-body');
+    const iconEl = badge.querySelector('.wa-helper-deal-toggle-icon');
+    
+    if (titleEl && bodyEl && iconEl) {
+      titleEl.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isCollapsed = badge.classList.contains('collapsed');
+        if (isCollapsed) {
+          badge.classList.remove('collapsed');
+          bodyEl.style.display = 'block';
+          iconEl.textContent = '▲';
+          titleEl.querySelector('span:first-child').textContent = '📊 SMART DEAL CALCULATOR';
+        } else {
+          badge.classList.add('collapsed');
+          bodyEl.style.display = 'none';
+          iconEl.textContent = '▼';
+          titleEl.querySelector('span:first-child').textContent = '📊 Lihat Kalkulasi Deal';
+        }
+      });
+    }
     
     const copyBtn = badge.querySelector('.wa-helper-copy-btn');
     if (copyBtn) {
