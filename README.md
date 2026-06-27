@@ -1,8 +1,8 @@
 # WhatsApp Web Helper Extension 🚀
 
-Ekstensi Google Chrome super canggih yang dirancang khusus untuk mempermudah pebisnis, importir, dan negosiator saat bertransaksi melalui **WhatsApp Web**.
+Ekstensi Google Chrome yang dirancang khusus untuk mempermudah pebisnis, importir, dan negosiator saat bertransaksi melalui **WhatsApp Web**.
 
-Ekstensi ini menyulap WhatsApp Web kamu menjadi alat bisnis yang sangat kuat dengan fitur perhitungan otomatis, konversi mata uang, dan terjemahan langsung di dalam layar chat!
+Ekstensi ini membantu aktivitas bisnis kamu dengan fitur perhitungan otomatis, konversi mata uang, dan terjemahan langsung di dalam layar chat!
 
 ---
 
