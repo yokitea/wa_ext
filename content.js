@@ -300,16 +300,26 @@ function convertCurrenciesInText(text, targetCurrency) {
 
 // Translate the text inside the input textbox to target language (and convert currencies)
 async function translateOutgoingText(textbox) {
-  const text = textbox.textContent.trim();
-  if (!text) return;
+  const sel = window.getSelection();
+  let selectedText = '';
+  let isPartialSelection = false;
+
+  // Check if user has highlighted text inside the input box
+  if (sel && sel.toString().trim().length > 0 && textbox.contains(sel.anchorNode)) {
+    selectedText = sel.toString().trim();
+    isPartialSelection = true;
+  }
+
+  const textToTranslate = isPartialSelection ? selectedText : textbox.textContent.trim();
+  if (!textToTranslate) return;
   
   const btn = document.getElementById('wa-helper-outgoing-btn');
   if (btn) btn.innerHTML = '⏳';
   
   // 1. Convert currencies in the input text first
-  let processedText = text;
+  let processedText = textToTranslate;
   if (settings.enableCurrency) {
-    processedText = convertCurrenciesInText(text, settings.targetCurrency);
+    processedText = convertCurrenciesInText(textToTranslate, settings.targetCurrency);
   }
   
   // 2. Translate the processed text if enabled
@@ -326,34 +336,47 @@ async function translateOutgoingText(textbox) {
   
   if (btn) btn.innerHTML = '🌐';
   
-  insertTextIntoTextbox(textbox, finalOutput);
+  insertTextIntoTextbox(textbox, finalOutput, isPartialSelection);
 }
 
 // Programmatically insert text into contenteditable editor (supports React / Lexical states)
-function insertTextIntoTextbox(textbox, text) {
+function insertTextIntoTextbox(textbox, text, isPartialSelection) {
   textbox.focus();
   
-  // Select all content inside the textbox
-  const range = document.createRange();
-  range.selectNodeContents(textbox);
-  const sel = window.getSelection();
-  sel.removeAllRanges();
-  sel.addRange(range);
+  if (!isPartialSelection) {
+    // Select all content inside the textbox for full replacement
+    const range = document.createRange();
+    range.selectNodeContents(textbox);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
   
   // Try to use execCommand first (updates React state directly)
+  // If isPartialSelection is true, it replaces only the highlighted text
   const success = document.execCommand('insertText', false, text);
   
   if (!success) {
-    console.warn('WA Web Helper: execCommand failed, falling back to InputEvent');
-    // Fallback: update DOM text and fire InputEvent
-    textbox.textContent = text;
-    const inputEvent = new InputEvent('input', {
-      bubbles: true,
-      cancelable: true,
-      inputType: 'insertText',
-      data: text
-    });
-    textbox.dispatchEvent(inputEvent);
+    console.warn('WA Web Helper: execCommand failed, falling back to DOM injection');
+    if (isPartialSelection) {
+      // Fallback for partial selection: delete selected text and insert node
+      const sel = window.getSelection();
+      if (sel.rangeCount) {
+        const range = sel.getRangeAt(0);
+        range.deleteContents();
+        range.insertNode(document.createTextNode(text));
+      }
+    } else {
+      // Fallback: update DOM text and fire InputEvent
+      textbox.textContent = text;
+      const inputEvent = new InputEvent('input', {
+        bubbles: true,
+        cancelable: true,
+        inputType: 'insertText',
+        data: text
+      });
+      textbox.dispatchEvent(inputEvent);
+    }
   }
 }
 
