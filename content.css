@@ -100,6 +100,59 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
   height: 0 !important;
 }
 
+/* Business Deal Calculator Card Styling */
+.wa-helper-deal-calc {
+  background: #f1f8e9 !important;
+  padding: 10px 14px !important;
+  border-radius: 10px !important;
+  margin: 8px 0 !important;
+  border-left: 4px solid #43a047 !important;
+  font-size: 12.5px !important;
+  font-family: 'Courier New', Courier, monospace !important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
+  max-width: 95% !important;
+  box-sizing: border-box !important;
+  display: block !important;
+  color: #333333 !important;
+  clear: both;
+}
+
+.wa-helper-deal-title {
+  font-weight: bold !important;
+  color: #2e7d32 !important;
+  font-size: 11.5px !important;
+  margin-bottom: 6px !important;
+  border-bottom: 1px dashed rgba(0,0,0,0.1) !important;
+  padding-bottom: 4px !important;
+  letter-spacing: 0.5px !important;
+}
+
+.wa-helper-deal-row {
+  display: flex !important;
+  justify-content: space-between !important;
+  margin-bottom: 3px !important;
+  line-height: 1.4 !important;
+}
+
+.wa-helper-deal-row.total {
+  font-weight: bold !important;
+  color: #2e7d32 !important;
+  font-size: 13.5px !important;
+  border-top: 1px solid rgba(0,0,0,0.08) !important;
+  margin-top: 4px !important;
+  padding-top: 4px !important;
+}
+
+.wa-helper-deal-row.discount {
+  color: #c62828 !important;
+  font-style: italic !important;
+}
+
+.wa-helper-deal-row.converted {
+  color: #1565c0 !important;
+  font-weight: 600 !important;
+}
+
 @keyframes fadeInWA {
   from {
     opacity: 0;

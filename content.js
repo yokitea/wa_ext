@@ -131,6 +131,21 @@ async function translateText(text, targetLang) {
   });
 }
 
+// Detect currency ISO code from symbol or text string
+function detectCurrencyFromText(text, targetCurrency) {
+  const clean = text.toLowerCase();
+  if (clean.includes('¥')) {
+    return targetCurrency === 'CNY' ? 'CNY' : 'JPY';
+  }
+  if (clean.includes('cny') || clean.includes('rmb') || clean.includes('yuan')) return 'CNY';
+  if (clean.includes('$') || clean.includes('usd')) return 'USD';
+  if (clean.includes('€') || clean.includes('eur') || clean.includes('euro')) return 'EUR';
+  if (clean.includes('sgd') || clean.includes('s$')) return 'SGD';
+  if (clean.includes('rp') || clean.includes('rupiah')) return 'IDR';
+  if (clean.includes('jpy') || clean.includes('yen')) return 'JPY';
+  return 'CNY'; // default fallback for import negotiations
+}
+
 // Parse text for currency symbols and return formatted translation
 function parseAndConvertCurrency(text, targetCurrency) {
   // Determine if ¥ represents JPY or CNY based on targetCurrency to avoid double-conversion
@@ -172,6 +187,52 @@ function parseAndConvertCurrency(text, targetCurrency) {
   return results;
 }
 
+// Parse custom deal formulas (e.g. 10 pcs x ¥5.800.000 diskon 10%)
+function parseDealFormula(text) {
+  // Regex supporting: [qty] [pcs/unit/etc] [x/×/@] [currency symbol]? [price] [currency symbol]? [diskon/disc]? [discount]%
+  const dealPattern = /(\d+)\s*(?:pcs|pc|item|unit|buah|box|ctn|pcs?)\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang)?\s*(\d+)%)?/i;
+  
+  const match = text.match(dealPattern);
+  if (!match) return null;
+  
+  const qty = parseInt(match[1]);
+  const price = parseSmartFloat(match[3]);
+  if (isNaN(price)) return null;
+  
+  const currencyIndicator = match[2] || match[4] || '';
+  const currencyCode = detectCurrencyFromText(currencyIndicator, settings.targetCurrency);
+  
+  const discount = match[5] ? parseInt(match[5]) : 0;
+  
+  const subtotal = qty * price;
+  const discountAmount = subtotal * (discount / 100);
+  const total = subtotal - discountAmount;
+  const pricePerUnit = total / qty;
+  
+  let convertedTotal = null;
+  let convertedPerUnit = null;
+  
+  if (currencyCode !== settings.targetCurrency) {
+    const convTotalVal = convert(total, currencyCode, settings.targetCurrency);
+    const convPerUnitVal = convert(pricePerUnit, currencyCode, settings.targetCurrency);
+    if (convTotalVal) convertedTotal = formatCurrency(convTotalVal, settings.targetCurrency);
+    if (convPerUnitVal) convertedPerUnit = formatCurrency(convPerUnitVal, settings.targetCurrency);
+  }
+  
+  return {
+    qty,
+    price,
+    discount,
+    currencyCode,
+    subtotal,
+    discountAmount,
+    total,
+    pricePerUnit,
+    convertedTotal,
+    convertedPerUnit
+  };
+}
+
 // Helper to find the actual element containing the text inside a message container
 function getTextContainer(messageElement) {
   let el = messageElement.querySelector('span.selectable-text');
@@ -195,18 +256,66 @@ function processMessageElement(messageElement) {
   const textSpan = getTextContainer(messageElement);
   if (!textSpan) return;
 
-  // Remove existing currency badge if any to prevent duplication and allow updates
+  // Clean old currency and deal badges to support re-rendering and prevent duplicates
   const oldBadge = messageElement.querySelector('.wa-helper-converted');
-  if (oldBadge) {
-    oldBadge.remove();
-  }
+  if (oldBadge) oldBadge.remove();
+  
+  const oldDealBadge = messageElement.querySelector('.wa-helper-deal-calc');
+  if (oldDealBadge) oldDealBadge.remove();
 
   // Get raw message text
   const originalText = textSpan.textContent.trim();
   if (!originalText) return;
 
-  // 1. Handle Currency Conversion
-  if (settings.enableCurrency) {
+  // Check if message matches the deal calculator formula
+  const dealResult = parseDealFormula(originalText);
+  
+  if (dealResult) {
+    // 1. Handle Deal Calculator Rendering
+    const badge = document.createElement('div');
+    badge.className = 'wa-helper-deal-calc';
+    
+    const formattedPrice = formatCurrency(dealResult.price, dealResult.currencyCode);
+    const formattedSubtotal = formatCurrency(dealResult.subtotal, dealResult.currencyCode);
+    const formattedTotal = formatCurrency(dealResult.total, dealResult.currencyCode);
+    const formattedPerUnit = formatCurrency(dealResult.pricePerUnit, dealResult.currencyCode);
+    
+    let badgeHTML = `
+      <div class="wa-helper-deal-title">📊 SMART DEAL CALCULATOR</div>
+      <div class="wa-helper-deal-row"><span>🛒 Qty × Harga:</span> <span>${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}</span></div>
+    `;
+    
+    if (dealResult.discount > 0) {
+      const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+      badgeHTML += `
+        <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.discount}%:</span> <span>-${formattedDiscount}</span></div>
+      `;
+    }
+    
+    badgeHTML += `
+      <div class="wa-helper-deal-row total"><span>💰 Total:</span> <span>${formattedTotal}</span></div>
+      <div class="wa-helper-deal-row"><span>💳 Per pcs:</span> <span>${formattedPerUnit}</span></div>
+    `;
+    
+    if (dealResult.convertedTotal) {
+      badgeHTML += `
+        <div class="wa-helper-deal-row converted" style="border-top: 1px dashed rgba(0,0,0,0.1); margin-top: 6px; padding-top: 6px;">
+          <span>🔄 Total (${settings.targetCurrency}):</span> <strong>${dealResult.convertedTotal}</strong>
+        </div>
+        <div class="wa-helper-deal-row converted">
+          <span>🔄 Per pcs (${settings.targetCurrency}):</span> <strong>${dealResult.convertedPerUnit}</strong>
+        </div>
+      `;
+    }
+    
+    badge.innerHTML = badgeHTML;
+    
+    const container = textSpan.parentElement;
+    if (container) {
+      container.appendChild(badge);
+    }
+  } else if (settings.enableCurrency) {
+    // 2. Handle standard Currency Conversion (only if NOT a deal calculation to avoid clutter)
     const conversions = parseAndConvertCurrency(originalText, settings.targetCurrency);
     if (conversions.length > 0) {
       const badgeSpan = document.createElement('span');
@@ -216,7 +325,7 @@ function processMessageElement(messageElement) {
     }
   }
 
-  // 2. Handle Translation Button
+  // 3. Handle Translation Button
   if (settings.enableTranslation) {
     const alreadyHasBtn = messageElement.querySelector('.wa-helper-translate-btn');
     if (!alreadyHasBtn) {
