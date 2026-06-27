@@ -133,12 +133,16 @@ async function translateText(text, targetLang) {
 
 // Parse text for currency symbols and return formatted translation
 function parseAndConvertCurrency(text, targetCurrency) {
+  // Determine if ¥ represents JPY or CNY based on targetCurrency to avoid double-conversion
+  const yenCode = targetCurrency === 'CNY' ? 'CNY' : 'JPY';
+
   const patterns = [
     { regex: /(?:\$|usd)\s*(\d+(?:[.,]\d+)*)/gi, code: 'USD' },
     { regex: /(\d+(?:[.,]\d+)*)\s*(?:usd|dollars?)/gi, code: 'USD' },
     { regex: /(?:€|eur)\s*(\d+(?:[.,]\d+)*)/gi, code: 'EUR' },
     { regex: /(\d+(?:[.,]\d+)*)\s*(?:eur|euros?)/gi, code: 'EUR' },
-    { regex: /(?:¥|jpy|yen)\s*(\d+(?:[.,]\d+)*)/gi, code: 'JPY' },
+    { regex: /¥\s*(\d+(?:[.,]\d+)*)/gi, code: yenCode },
+    { regex: /(?:jpy|yen)\s*(\d+(?:[.,]\d+)*)/gi, code: 'JPY' },
     { regex: /(\d+(?:[.,]\d+)*)\s*(?:jpy|yen)/gi, code: 'JPY' },
     { regex: /(?:sgd|s\$)\s*(\d+(?:[.,]\d+)*)/gi, code: 'SGD' },
     { regex: /(\d+(?:[.,]\d+)*)\s*(?:sgd)/gi, code: 'SGD' },
@@ -286,8 +290,9 @@ function convertCurrenciesInText(text, targetCurrency) {
   conversions.sort((a, b) => b.original.length - a.original.length);
   
   for (const item of conversions) {
-    // Replace all instances of the original string
-    modifiedText = modifiedText.split(item.original).join(item.converted);
+    // Keep both: converted value and the original value in parentheses (e.g. ¥57.03 (Rp 150.000))
+    const replacement = `${item.converted} (${item.original})`;
+    modifiedText = modifiedText.split(item.original).join(replacement);
   }
   
   return modifiedText;
