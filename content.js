@@ -277,7 +277,23 @@ function processAllMessages() {
 // OUTGOING MESSAGE TRANSLATION (INPUT FIELD)
 // ==========================================
 
-// Translate the text inside the input textbox to target language
+// Convert all currency occurrences inside a given text string to target currency
+function convertCurrenciesInText(text, targetCurrency) {
+  const conversions = parseAndConvertCurrency(text, targetCurrency);
+  let modifiedText = text;
+  
+  // Sort conversions by original string length descending to avoid partial matching bugs
+  conversions.sort((a, b) => b.original.length - a.original.length);
+  
+  for (const item of conversions) {
+    // Replace all instances of the original string
+    modifiedText = modifiedText.split(item.original).join(item.converted);
+  }
+  
+  return modifiedText;
+}
+
+// Translate the text inside the input textbox to target language (and convert currencies)
 async function translateOutgoingText(textbox) {
   const text = textbox.textContent.trim();
   if (!text) return;
@@ -285,16 +301,27 @@ async function translateOutgoingText(textbox) {
   const btn = document.getElementById('wa-helper-outgoing-btn');
   if (btn) btn.innerHTML = '⏳';
   
-  console.log(`WA Web Helper: Translating input text to: ${settings.targetLang}`);
-  const translated = await translateText(text, settings.targetLang);
+  // 1. Convert currencies in the input text first
+  let processedText = text;
+  if (settings.enableCurrency) {
+    processedText = convertCurrenciesInText(text, settings.targetCurrency);
+  }
+  
+  // 2. Translate the processed text if enabled
+  let finalOutput = processedText;
+  if (settings.enableTranslation) {
+    console.log(`WA Web Helper: Translating input text to: ${settings.targetLang}`);
+    const translated = await translateText(processedText, settings.targetLang);
+    if (translated) {
+      finalOutput = translated;
+    } else {
+      console.warn('WA Web Helper: Translation failed, using currency-only converted text');
+    }
+  }
   
   if (btn) btn.innerHTML = '🌐';
   
-  if (translated) {
-    insertTextIntoTextbox(textbox, translated);
-  } else {
-    alert('Gagal menerjemahkan teks input.');
-  }
+  insertTextIntoTextbox(textbox, finalOutput);
 }
 
 // Programmatically insert text into contenteditable editor (supports React / Lexical states)
