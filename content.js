@@ -2,6 +2,7 @@
 let exchangeRates = null;
 let settings = {
   enableCurrency: true,
+  enableDealCalc: true,
   targetCurrency: 'IDR',
   enableTranslation: true,
   targetLang: 'id'
@@ -38,6 +39,7 @@ async function fetchRates() {
 function loadSettings() {
   chrome.storage.local.get({
     enableCurrency: true,
+    enableDealCalc: true,
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id'
@@ -191,26 +193,38 @@ function parseAndConvertCurrency(text, targetCurrency) {
   return results;
 }
 
-// Parse custom deal formulas (e.g. 10 pcs x ¥5.800.000 diskon 10%)
+// Parse custom deal formulas (e.g. 10 pcs x ¥5.800.000 diskon 10% + 5%)
 function parseDealFormula(text) {
-  // Regex supporting: [qty] [pcs/unit/etc] [x/×/@] [currency symbol]? [price] [currency symbol]? [diskon/disc]? [discount]%
-  const dealPattern = /(\d+)\s*(?:pcs|pc|item|unit|buah|box|ctn|pcs?)\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang)?\s*(\d+)%)?/i;
+  // Regex supporting: [qty] [pcs/unit/etc]? [x/×/@] [currency symbol]? [price] [jt/k/m]? [currency symbol]? [diskon/disc]? [discount]% [+ discount2%]?
+  const dealPattern = /(\d+)(?:\s*(?:pcs|pc|item|unit|buah|box|ctn))?\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)\s*(jt|juta|k|rb|ribu|m)?(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang|-)?\s*(\d+)%(?:\s*\+\s*(\d+)%)?)?/i;
   
   const match = text.match(dealPattern);
   if (!match) return null;
   
   const qty = parseInt(match[1]);
-  const price = parseSmartFloat(match[3]);
+  let price = parseSmartFloat(match[3]);
   if (isNaN(price)) return null;
+
+  // Apply suffix multipliers
+  const suffix = match[4] ? match[4].toLowerCase() : '';
+  if (suffix === 'jt' || suffix === 'juta' || suffix === 'm') price *= 1000000;
+  else if (suffix === 'k' || suffix === 'rb' || suffix === 'ribu') price *= 1000;
   
-  const currencyIndicator = match[2] || match[4] || '';
+  const currencyIndicator = match[2] || match[5] || '';
   const currencyCode = detectCurrencyFromText(currencyIndicator, settings.targetCurrency);
   
-  const discount = match[5] ? parseInt(match[5]) : 0;
+  const disc1 = match[6] ? parseInt(match[6]) : 0;
+  const disc2 = match[7] ? parseInt(match[7]) : 0;
   
   const subtotal = qty * price;
-  const discountAmount = subtotal * (discount / 100);
-  const total = subtotal - discountAmount;
+  
+  // Double discount calculation
+  const disc1Amount = subtotal * (disc1 / 100);
+  const totalAfterDisc1 = subtotal - disc1Amount;
+  const disc2Amount = totalAfterDisc1 * (disc2 / 100);
+  const total = totalAfterDisc1 - disc2Amount;
+  
+  const discountAmount = subtotal - total;
   const pricePerUnit = total / qty;
   
   let convertedTotal = null;
@@ -226,10 +240,11 @@ function parseDealFormula(text) {
   return {
     qty,
     price,
-    discount,
+    disc1,
+    disc2,
+    discountAmount,
     currencyCode,
     subtotal,
-    discountAmount,
     total,
     pricePerUnit,
     convertedTotal,
@@ -272,7 +287,10 @@ function processMessageElement(messageElement) {
   if (!originalText) return;
 
   // Check if message matches the deal calculator formula
-  const dealResult = parseDealFormula(originalText);
+  let dealResult = null;
+  if (settings.enableDealCalc) {
+    dealResult = parseDealFormula(originalText);
+  }
   
   if (dealResult) {
     // 1. Handle Deal Calculator Rendering
@@ -289,10 +307,13 @@ function processMessageElement(messageElement) {
       <div class="wa-helper-deal-row"><span>🛒 Qty × Harga:</span> <span>${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}</span></div>
     `;
     
-    if (dealResult.discount > 0) {
+    if (dealResult.discountAmount > 0) {
       const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+      let discLabel = dealResult.disc1 + '%';
+      if (dealResult.disc2 > 0) discLabel += ' + ' + dealResult.disc2 + '%';
+      
       badgeHTML += `
-        <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.discount}%:</span> <span>-${formattedDiscount}</span></div>
+        <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${discLabel}:</span> <span>-${formattedDiscount}</span></div>
       `;
     }
     
@@ -312,7 +333,32 @@ function processMessageElement(messageElement) {
       `;
     }
     
+    const copyData = `🛒 Qty × Harga: ${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}` +
+      (dealResult.discountAmount > 0 ? `\n🔻 Diskon ${dealResult.disc1}%${dealResult.disc2 > 0 ? ' + '+dealResult.disc2+'%' : ''}: -${formatCurrency(dealResult.discountAmount, dealResult.currencyCode)}` : '') +
+      `\n💰 Total: ${formattedTotal}` +
+      `\n💳 Per pcs: ${formattedPerUnit}` +
+      (dealResult.convertedTotal ? `\n\nKonversi (${settings.targetCurrency}):\n🔄 Total: ${dealResult.convertedTotal}\n🔄 Per pcs: ${dealResult.convertedPerUnit}` : '');
+      
+    badgeHTML += `
+      <div style="text-align: right; margin-top: 8px;">
+        <button class="wa-helper-copy-btn" data-copy="${encodeURIComponent(copyData)}">📋 Salin</button>
+      </div>
+    `;
+    
     badge.innerHTML = badgeHTML;
+    
+    const copyBtn = badge.querySelector('.wa-helper-copy-btn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const textToCopy = decodeURIComponent(copyBtn.getAttribute('data-copy'));
+        navigator.clipboard.writeText(textToCopy).then(() => {
+          const originalText = copyBtn.innerHTML;
+          copyBtn.innerHTML = '✅ Tersalin';
+          setTimeout(() => { copyBtn.innerHTML = originalText; }, 1500);
+        });
+      });
+    }
     
     const container = textSpan.parentElement;
     if (container) {

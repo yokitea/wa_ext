@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Elements
   const enableCurrencyCheckbox = document.getElementById('enable-currency');
   const targetCurrencySelect = document.getElementById('target-currency');
+  const enableDealCalcCheckbox = document.getElementById('enable-deal-calc');
   const enableTranslationCheckbox = document.getElementById('enable-translation');
   const targetLangSelect = document.getElementById('target-lang');
   
@@ -39,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // State
   let state = {
     enableCurrency: true,
+    enableDealCalc: true,
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
@@ -59,6 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Load state and render
   chrome.storage.local.get({
     enableCurrency: true,
+    enableDealCalc: true,
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
@@ -73,6 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Set active values
     enableCurrencyCheckbox.checked = state.enableCurrency;
+    enableDealCalcCheckbox.checked = state.enableDealCalc;
     enableTranslationCheckbox.checked = state.enableTranslation;
     
     renderAll();
@@ -154,12 +158,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function saveActiveSettings() {
     chrome.storage.local.set({
       enableCurrency: enableCurrencyCheckbox.checked,
+      enableDealCalc: enableDealCalcCheckbox.checked,
       targetCurrency: targetCurrencySelect.value,
       enableTranslation: enableTranslationCheckbox.checked,
       targetLang: targetLangSelect.value
     });
     
     state.enableCurrency = enableCurrencyCheckbox.checked;
+    state.enableDealCalc = enableDealCalcCheckbox.checked;
     state.targetCurrency = targetCurrencySelect.value;
     state.enableTranslation = enableTranslationCheckbox.checked;
     state.targetLang = targetLangSelect.value;
@@ -237,6 +243,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Event listeners for selects and checkboxes
   enableCurrencyCheckbox.addEventListener('change', saveActiveSettings);
+  enableDealCalcCheckbox.addEventListener('change', saveActiveSettings);
   targetCurrencySelect.addEventListener('change', saveActiveSettings);
   enableTranslationCheckbox.addEventListener('change', saveActiveSettings);
   targetLangSelect.addEventListener('change', saveActiveSettings);

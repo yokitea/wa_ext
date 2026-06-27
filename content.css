@@ -159,6 +159,28 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
   font-weight: 600 !important;
 }
 
+/* Copy Button Styling */
+.wa-helper-copy-btn {
+  background: #e8f5e9 !important;
+  border: 1px solid #a5d6a7 !important;
+  color: #2e7d32 !important;
+  padding: 4px 8px !important;
+  font-size: 11px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  font-weight: bold !important;
+  font-family: inherit !important;
+  transition: all 0.2s !important;
+}
+
+.wa-helper-copy-btn:hover {
+  background: #c8e6c9 !important;
+}
+
+.wa-helper-copy-btn:active {
+  transform: scale(0.95) !important;
+}
+
 /* ==========================================
    DARK MODE SUPPORT FOR WHATSAPP WEB
    ========================================== */
@@ -198,6 +220,16 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
 
 .theme-dark .wa-helper-divider {
   border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.theme-dark .wa-helper-copy-btn {
+  background: rgba(255, 255, 255, 0.1) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  color: #00a884 !important;
+}
+
+.theme-dark .wa-helper-copy-btn:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
 }
 
 @keyframes fadeInWA {
