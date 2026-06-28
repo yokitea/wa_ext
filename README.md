@@ -16,6 +16,8 @@ Ekstensi ini membantu aktivitas bisnis kamu dengan fitur perhitungan otomatis, k
    Terdapat tombol globe (🌐) tersembunyi di sebelah kiri setiap balon obrolan. Klik tombol tersebut untuk menerjemahkan pesan secara instan tanpa perlu membuka tab Google Translate.
 4. **🌙 Dark Mode & UI Modern**
    Tampilan ekstensi sangat mulus, responsif, hemat ruang (*collapsible*), dan 100% mendukung mode gelap (Dark Mode) bawaan WhatsApp Web.
+5. **📄 Cetak Invoice (Export PDF)**
+   Setiap hasil kalkulasi bisnis dapat dicetak menjadi format *Invoice* profesional (atau PDF) hanya dengan satu klik.
 
 ---
 
@@ -66,6 +68,12 @@ Males ngetik angka nol (0) banyak-banyak? Gunakan singkatan:
 ### **📋 Tombol Salin (Copy)**
 Setelah mengeklik panel **"📊 Lihat Kalkulasi Deal ▼"** untuk membukanya, terdapat tombol **Salin** di pojok kanan bawah. Klik tombol tersebut untuk menyalin seluruh rincian transaksi (bersih, rapi, beserta hasil konversinya) yang siap di-*paste* ke dokumen Invoice atau Purchase Order.
 
+### **📄 Export ke PDF (Invoice)**
+Di sebelah tombol Salin, terdapat tombol **📄 PDF**. Jika diklik, ekstensi akan membuka tab baru berisi rincian transaksi dalam format struk/invoice yang bersih dan profesional. Jendela cetak (*Print*) akan otomatis terbuka sehingga kamu bisa langsung menyimpannya sebagai file PDF.
+
+### **⌨️ Shortcut Keyboard**
+Tekan **`Alt + Shift + E`** pada *keyboard* saat berada di layar WhatsApp Web untuk memekarkan (expand) atau menciutkan (collapse) semua kartu kalkulator yang ada secara bersamaan.
+
 ---
 
 ## ⚙️ Pengaturan Ekstensi (Popup Settings)
@@ -73,9 +81,11 @@ Setelah mengeklik panel **"📊 Lihat Kalkulasi Deal ▼"** untuk membukanya, te
 Klik ikon ekstensi di pojok kanan atas browser Chrome kamu untuk membuka menu pengaturan:
 - **Konversi Mata Uang:** Nyalakan/matikan fitur konversi otomatis.
 - **Kalkulator Bisnis (Deal Calc):** Nyalakan/matikan fitur pembacaan rumus Smart Deal Calculator.
+- **Tampilan Default:** Mengatur apakah kartu kalkulator baru muncul dalam kondisi tertutup (Ciut) atau terbuka lebar (Mekar).
 - **Mata Uang Target:** Ubah mata uang tujuan (Default: `IDR`).
 - **Terjemahan Pesan:** Nyalakan/matikan tombol terjemahan (🌐).
 - **Bahasa Tujuan Terjemahan:** Ubah bahasa hasil terjemahan (Default: `Indonesian`).
+- **Mekar Semua / Ciut Semua:** Tombol cepat untuk membuka/menutup seluruh kartu kalkulator secara massal.
 
 Semua pengaturan akan otomatis tersimpan. Cukup *refresh* (F5) tab WhatsApp Web kamu jika ada perubahan yang tidak langsung muncul.
 
