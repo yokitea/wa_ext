@@ -26,6 +26,16 @@ document.addEventListener('DOMContentLoaded', () => {
   const defaultCardStateSelect = document.getElementById('default-card-state');
   const enableTranslationCheckbox = document.getElementById('enable-translation');
   const targetLangSelect = document.getElementById('target-lang');
+  
+  // Tax Elements
+  const enableTaxCheckbox = document.getElementById('enable-tax');
+  const taxOptionsDiv = document.getElementById('tax-options');
+  const taxTypeSelect = document.getElementById('tax-type');
+  const taxMethodRow = document.getElementById('tax-method-row');
+  const taxMethodSelect = document.getElementById('tax-method');
+  const taxPpnInput = document.getElementById('tax-ppn');
+  const taxPphInput = document.getElementById('tax-pph');
+  
   const btnExpandAll = document.getElementById('btn-expand-all');
   const btnCollapseAll = document.getElementById('btn-collapse-all');
   
@@ -48,6 +58,11 @@ document.addEventListener('DOMContentLoaded', () => {
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
+    enableTax: false,
+    taxType: 'exclude',
+    taxMethod: 'lapangan',
+    taxPpn: 11,
+    taxPph: 2,
     customCurrencies: ['IDR', 'USD', 'SGD'],
     customLanguages: [
       { code: 'id', name: 'Indonesia' },
@@ -70,6 +85,11 @@ document.addEventListener('DOMContentLoaded', () => {
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
+    enableTax: false,
+    taxType: 'exclude',
+    taxMethod: 'lapangan',
+    taxPpn: 11,
+    taxPph: 2,
     customCurrencies: ['IDR', 'USD', 'SGD'],
     customLanguages: [
       { code: 'id', name: 'Indonesia' },
@@ -85,8 +105,22 @@ document.addEventListener('DOMContentLoaded', () => {
     defaultCardStateSelect.value = state.defaultCardState || 'collapsed';
     enableTranslationCheckbox.checked = state.enableTranslation;
     
+    // Set Tax Values
+    enableTaxCheckbox.checked = state.enableTax;
+    taxTypeSelect.value = state.taxType || 'exclude';
+    taxMethodSelect.value = state.taxMethod || 'lapangan';
+    taxPpnInput.value = state.taxPpn;
+    taxPphInput.value = state.taxPph;
+    
+    updateTaxUI();
     renderAll();
   });
+
+  // Update Tax UI Visibility
+  function updateTaxUI() {
+    taxOptionsDiv.style.display = enableTaxCheckbox.checked ? 'block' : 'none';
+    taxMethodRow.style.display = taxTypeSelect.value === 'include' ? 'flex' : 'none';
+  }
 
   // Render function
   function renderAll() {
@@ -168,7 +202,12 @@ document.addEventListener('DOMContentLoaded', () => {
       defaultCardState: defaultCardStateSelect.value,
       targetCurrency: targetCurrencySelect.value,
       enableTranslation: enableTranslationCheckbox.checked,
-      targetLang: targetLangSelect.value
+      targetLang: targetLangSelect.value,
+      enableTax: enableTaxCheckbox.checked,
+      taxType: taxTypeSelect.value,
+      taxMethod: taxMethodSelect.value,
+      taxPpn: parseFloat(taxPpnInput.value) || 0,
+      taxPph: parseFloat(taxPphInput.value) || 0
     });
     
     state.enableCurrency = enableCurrencyCheckbox.checked;
@@ -177,6 +216,11 @@ document.addEventListener('DOMContentLoaded', () => {
     state.targetCurrency = targetCurrencySelect.value;
     state.enableTranslation = enableTranslationCheckbox.checked;
     state.targetLang = targetLangSelect.value;
+    state.enableTax = enableTaxCheckbox.checked;
+    state.taxType = taxTypeSelect.value;
+    state.taxMethod = taxMethodSelect.value;
+    state.taxPpn = parseFloat(taxPpnInput.value) || 0;
+    state.taxPph = parseFloat(taxPphInput.value) || 0;
   }
 
   // Save complete state to Chrome storage
@@ -256,6 +300,13 @@ document.addEventListener('DOMContentLoaded', () => {
   targetCurrencySelect.addEventListener('change', saveActiveSettings);
   enableTranslationCheckbox.addEventListener('change', saveActiveSettings);
   targetLangSelect.addEventListener('change', saveActiveSettings);
+  
+  // Tax listeners
+  enableTaxCheckbox.addEventListener('change', () => { updateTaxUI(); saveActiveSettings(); });
+  taxTypeSelect.addEventListener('change', () => { updateTaxUI(); saveActiveSettings(); });
+  taxMethodSelect.addEventListener('change', saveActiveSettings);
+  taxPpnInput.addEventListener('input', saveActiveSettings);
+  taxPphInput.addEventListener('input', saveActiveSettings);
 
   btnExpandAll.addEventListener('click', () => {
     chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {

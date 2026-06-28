@@ -74,6 +74,25 @@ function renderInvoice(data) {
       </div>
     `;
   }
+  
+  if (data.hasTax) {
+    if (data.ppnAmount > 0) {
+      totalsHTML += `
+        <div class="row">
+          <span>PPN (${data.ppnRate}%)</span>
+          <span>+${formatCurrencyStr(data.ppnAmount, data.currencyCode)}</span>
+        </div>
+      `;
+    }
+    if (data.pphAmount > 0) {
+      totalsHTML += `
+        <div class="row discount">
+          <span>PPH (${data.pphRate}%)</span>
+          <span>-${formatCurrencyStr(data.pphAmount, data.currencyCode)}</span>
+        </div>
+      `;
+    }
+  }
 
   totalsHTML += `
     <div class="row grand-total">

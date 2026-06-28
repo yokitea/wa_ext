@@ -43,7 +43,12 @@ function loadSettings() {
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
-    defaultCardState: 'collapsed'
+    defaultCardState: 'collapsed',
+    enableTax: false,
+    taxType: 'exclude',
+    taxMethod: 'lapangan',
+    taxPpn: 11,
+    taxPph: 2
   }, (items) => {
     settings = items;
     console.log('WA Web Helper: Settings loaded', settings);
@@ -219,13 +224,37 @@ function parseDealFormula(text) {
   
   const subtotal = qty * price;
   
-  // Double discount calculation
-  const disc1Amount = subtotal * (disc1 / 100);
-  const totalAfterDisc1 = subtotal - disc1Amount;
+  // Tax logic
+  let ppnRate = settings.enableTax ? (parseFloat(settings.taxPpn) / 100) : 0;
+  let pphRate = settings.enableTax ? (parseFloat(settings.taxPph) / 100) : 0;
+
+  let baseSubtotal = subtotal; // DPP before discount
+  if (settings.enableTax && settings.taxType === 'include') {
+    if (settings.taxMethod === 'lapangan') {
+      baseSubtotal = subtotal - (subtotal * ppnRate) - (subtotal * pphRate);
+    } else {
+      // Akuntansi
+      baseSubtotal = subtotal / (1 + ppnRate); 
+    }
+  }
+
+  // Double discount calculation (based on DPP)
+  const disc1Amount = baseSubtotal * (disc1 / 100);
+  const totalAfterDisc1 = baseSubtotal - disc1Amount;
   const disc2Amount = totalAfterDisc1 * (disc2 / 100);
-  const total = totalAfterDisc1 - disc2Amount;
+  const dpp = totalAfterDisc1 - disc2Amount;
   
-  const discountAmount = subtotal - total;
+  const discountAmount = disc1Amount + disc2Amount;
+  
+  // Calculate final tax amounts
+  let ppnAmount = 0;
+  let pphAmount = 0;
+  if (settings.enableTax) {
+    ppnAmount = dpp * ppnRate;
+    pphAmount = dpp * pphRate;
+  }
+  
+  const total = dpp + ppnAmount - pphAmount;
   const pricePerUnit = total / qty;
   
   let convertedTotal = null;
@@ -246,6 +275,12 @@ function parseDealFormula(text) {
     discountAmount,
     currencyCode,
     subtotal,
+    dpp,
+    ppnAmount,
+    pphAmount,
+    ppnRate: settings.taxPpn,
+    pphRate: settings.taxPph,
+    hasTax: settings.enableTax,
     total,
     pricePerUnit,
     convertedTotal,
@@ -322,6 +357,16 @@ function processMessageElement(messageElement) {
       `;
     }
     
+    // Tax rows
+    if (dealResult.hasTax) {
+      if (dealResult.ppnAmount > 0) {
+        badgeHTML += `<div class="wa-helper-deal-row" style="color:#005a4e;"><span>🏛️ PPN (${dealResult.ppnRate}%):</span> <span>+${formatCurrency(dealResult.ppnAmount, dealResult.currencyCode)}</span></div>`;
+      }
+      if (dealResult.pphAmount > 0) {
+        badgeHTML += `<div class="wa-helper-deal-row" style="color:#d32f2f;"><span>🏛️ PPH (${dealResult.pphRate}%):</span> <span>-${formatCurrency(dealResult.pphAmount, dealResult.currencyCode)}</span></div>`;
+      }
+    }
+    
     badgeHTML += `
         <div class="wa-helper-deal-row total"><span>💰 Total:</span> <span>${formattedTotal}</span></div>
         <div class="wa-helper-deal-row"><span>💳 Per pcs:</span> <span>${formattedPerUnit}</span></div>
@@ -338,9 +383,15 @@ function processMessageElement(messageElement) {
       `;
     }
     
-    const copyData = `🛒 Qty × Harga: ${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}` +
-      (dealResult.discountAmount > 0 ? `\n🔻 Diskon ${dealResult.disc1}%${dealResult.disc2 > 0 ? ' + '+dealResult.disc2+'%' : ''}: -${formatCurrency(dealResult.discountAmount, dealResult.currencyCode)}` : '') +
-      `\n💰 Total: ${formattedTotal}` +
+    let copyData = `🛒 Qty × Harga: ${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}` +
+      (dealResult.discountAmount > 0 ? `\n🔻 Diskon ${dealResult.disc1}%${dealResult.disc2 > 0 ? ' + '+dealResult.disc2+'%' : ''}: -${formatCurrency(dealResult.discountAmount, dealResult.currencyCode)}` : '');
+      
+    if (dealResult.hasTax) {
+      if (dealResult.ppnAmount > 0) copyData += `\n🏛️ PPN (${dealResult.ppnRate}%): +${formatCurrency(dealResult.ppnAmount, dealResult.currencyCode)}`;
+      if (dealResult.pphAmount > 0) copyData += `\n🏛️ PPH (${dealResult.pphRate}%): -${formatCurrency(dealResult.pphAmount, dealResult.currencyCode)}`;
+    }
+      
+    copyData += `\n💰 Total: ${formattedTotal}` +
       `\n💳 Per pcs: ${formattedPerUnit}` +
       (dealResult.convertedTotal ? `\n\nKonversi (${settings.targetCurrency}):\n🔄 Total: ${dealResult.convertedTotal}\n🔄 Per pcs: ${dealResult.convertedPerUnit}` : '');
       

@@ -18,22 +18,37 @@ Ekstensi ini membantu aktivitas bisnis kamu dengan fitur perhitungan otomatis, k
    Tampilan ekstensi sangat mulus, responsif, hemat ruang (*collapsible*), dan 100% mendukung mode gelap (Dark Mode) bawaan WhatsApp Web.
 5. **📄 Cetak Deal Summary (Export PDF)**
    Setiap hasil kalkulasi bisnis dapat dicetak menjadi format *Deal Summary* profesional (atau PDF) hanya dengan satu klik.
+6. **🏛️ Kalkulasi Pajak Otomatis (PPN & PPH)**
+   Dilengkapi pengaturan pajak fleksibel (PPN & PPH) yang mendukung sistem harga *Exclude* (Pajak di luar) maupun *Include* (Pajak di dalam/dipotong otomatis untuk mencari Dasar Pengenaan Pajak). Bisa dinyalakan/dimatikan kapan saja!
 
 ---
 
-## 📥 Cara Pemasangan (Instalasi)
+## 📥 Cara Pemasangan (Instalasi Super Mudah)
 
-Karena ekstensi ini belum di-publish ke Chrome Web Store, kamu bisa memasangnya secara manual (Developer Mode) dengan sangat mudah:
+Karena ekstensi ini dirancang khusus dan belum ada di Chrome Web Store, instalasinya dilakukan secara manual. Jangan khawatir, caranya **sangat gampang** dan dijamin aman! Ikuti 3 langkah berikut:
 
-1. **Download/Clone** repository ini ke komputermu, lalu ekstrak foldernya.
-2. Buka browser **Google Chrome** dan ketik alamat berikut di *address bar*:
-   `chrome://extensions/`
-3. Di pojok kanan atas halaman, aktifkan saklar **Developer mode** (Mode Pengembang).
-4. Akan muncul beberapa tombol baru di kiri atas. Klik tombol **Load unpacked** (Muat yang belum dikemas).
-5. Pilih folder tempat kode ekstensi ini berada (misalnya folder `wa_ext`).
-6. Selesai! Ekstensi berhasil dipasang. Jangan lupa klik ikon *puzzle* (🧩) di Chrome dan **Pin (📌)** ekstensi "WhatsApp Web Helper" agar mudah diakses.
+### Langkah 1: Download File Ekstensi
+1. Buka halaman utama web ini (Github: https://github.com/yokitea/wa_ext).
+2. Cari tombol hijau bertuliskan **"<> Code"** di kanan atas, lalu klik.
+3. Pilih menu **"Download ZIP"**.
+4. Setelah file `.zip` selesai didownload, buka file tersebut dan **Extract (Keluarkan)** foldernya ke tempat yang aman di komputermu (misalnya di folder `Documents` atau `Desktop`). Pastikan kamu ingat di mana kamu menaruh folder hasil ekstrak tersebut!
 
-> **Note:** Setiap kali kamu melakukan update pada kode di folder tersebut, cukup kembali ke `chrome://extensions/` dan klik tombol **Reload** (ikon panah melingkar) pada kartu ekstensi ini.
+### Langkah 2: Pasang di Google Chrome
+1. Buka browser **Google Chrome**.
+2. Ketik alamat ini di *address bar* (tempat biasa ngetik alamat website seperti www...) lalu tekan Enter:
+   **`chrome://extensions/`**
+3. Di halaman yang terbuka, perhatikan pojok kanan atas. Cari tulisan **"Developer mode"** (atau "Mode Pengembang") dan **Aktifkan saklarnya** (geser ke kanan sampai warna biru).
+4. Setelah aktif, akan muncul tiga tombol baru di kiri atas. Klik tombol paling kiri: **"Load unpacked"** (atau "Muat yang belum dikemas").
+5. Jendela pencarian file akan terbuka. Cari dan pilih **folder hasil ekstrak** tadi (biasanya bernama `wa_ext-main` atau `wa_ext`), lalu klik tombol **Select Folder** di kanan bawah.
+6. **🎉 Selesai!** Ekstensi berhasil terpasang dan otomatis aktif.
+
+### Langkah 3: Munculkan Ikon di Layar (Opsional tapi Penting!)
+Agar ekstensinya gampang diatur sewaktu-waktu:
+1. Klik ikon **Puzzle (🧩)** di pojok kanan atas Chrome (di sebelah foto profil/baris pencarian).
+2. Cari nama ekstensi "WhatsApp Web Helper".
+3. Klik ikon **Pin (📌)** di sebelahnya sampai berubah warna. Ikon ekstensi kini akan selalu terlihat di layar komputermu!
+
+> **Tips Update ke Versi Baru:** Kalau ada versi terbaru di masa depan, cukup tiban/replace folder lama dengan file baru hasil ekstrak yang baru di-download. Lalu buka `chrome://extensions/` dan klik tombol **Reload** (ikon panah melingkar 🔄) pada kotak ekstensi ini.
 
 ---
 
