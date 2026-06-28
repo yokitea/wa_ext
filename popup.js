@@ -23,8 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
   const enableCurrencyCheckbox = document.getElementById('enable-currency');
   const targetCurrencySelect = document.getElementById('target-currency');
   const enableDealCalcCheckbox = document.getElementById('enable-deal-calc');
+  const defaultCardStateSelect = document.getElementById('default-card-state');
   const enableTranslationCheckbox = document.getElementById('enable-translation');
   const targetLangSelect = document.getElementById('target-lang');
+  const btnExpandAll = document.getElementById('btn-expand-all');
+  const btnCollapseAll = document.getElementById('btn-collapse-all');
   
   const toggleManageBtn = document.getElementById('toggle-manage');
   const managePanel = document.getElementById('manage-panel');
@@ -41,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
   let state = {
     enableCurrency: true,
     enableDealCalc: true,
+    defaultCardState: 'collapsed',
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
@@ -62,6 +66,7 @@ document.addEventListener('DOMContentLoaded', () => {
   chrome.storage.local.get({
     enableCurrency: true,
     enableDealCalc: true,
+    defaultCardState: 'collapsed',
     targetCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
@@ -77,6 +82,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Set active values
     enableCurrencyCheckbox.checked = state.enableCurrency;
     enableDealCalcCheckbox.checked = state.enableDealCalc;
+    defaultCardStateSelect.value = state.defaultCardState || 'collapsed';
     enableTranslationCheckbox.checked = state.enableTranslation;
     
     renderAll();
@@ -159,6 +165,7 @@ document.addEventListener('DOMContentLoaded', () => {
     chrome.storage.local.set({
       enableCurrency: enableCurrencyCheckbox.checked,
       enableDealCalc: enableDealCalcCheckbox.checked,
+      defaultCardState: defaultCardStateSelect.value,
       targetCurrency: targetCurrencySelect.value,
       enableTranslation: enableTranslationCheckbox.checked,
       targetLang: targetLangSelect.value
@@ -166,6 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
     
     state.enableCurrency = enableCurrencyCheckbox.checked;
     state.enableDealCalc = enableDealCalcCheckbox.checked;
+    state.defaultCardState = defaultCardStateSelect.value;
     state.targetCurrency = targetCurrencySelect.value;
     state.enableTranslation = enableTranslationCheckbox.checked;
     state.targetLang = targetLangSelect.value;
@@ -244,7 +252,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Event listeners for selects and checkboxes
   enableCurrencyCheckbox.addEventListener('change', saveActiveSettings);
   enableDealCalcCheckbox.addEventListener('change', saveActiveSettings);
+  defaultCardStateSelect.addEventListener('change', saveActiveSettings);
   targetCurrencySelect.addEventListener('change', saveActiveSettings);
   enableTranslationCheckbox.addEventListener('change', saveActiveSettings);
   targetLangSelect.addEventListener('change', saveActiveSettings);
+
+  btnExpandAll.addEventListener('click', () => {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, {action: 'EXPAND_ALL'});
+    });
+  });
+
+  btnCollapseAll.addEventListener('click', () => {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      if (tabs[0]) chrome.tabs.sendMessage(tabs[0].id, {action: 'COLLAPSE_ALL'});
+    });
+  });
 });

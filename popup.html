@@ -209,6 +209,18 @@
         <span class="slider"></span>
       </label>
     </div>
+    <div class="setting-row" style="margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;">
+      <label for="default-card-state">Tampilan Default</label>
+      <select id="default-card-state">
+        <option value="collapsed">Ciut (Ringkas)</option>
+        <option value="expanded">Mekar (Detail)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="setting-group" style="display: flex; gap: 8px; justify-content: space-between;">
+    <button id="btn-expand-all" style="flex:1; padding: 6px; background: #008069; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Mekar Semua</button>
+    <button id="btn-collapse-all" style="flex:1; padding: 6px; background: #e0e0e0; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Ciut Semua</button>
   </div>
 
   <div class="setting-group">
@@ -270,7 +282,7 @@
   </div>
 
   <div class="footer">
-    WhatsApp Web Helper v1.1 • Super Customizable
+    WhatsApp Web Helper v1.1 Beta 1 • Super Customizable
   </div>
 
   <script src="popup.js"></script>

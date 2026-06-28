@@ -42,7 +42,8 @@ function loadSettings() {
     enableDealCalc: true,
     targetCurrency: 'IDR',
     enableTranslation: true,
-    targetLang: 'id'
+    targetLang: 'id',
+    defaultCardState: 'collapsed'
   }, (items) => {
     settings = items;
     console.log('WA Web Helper: Settings loaded', settings);
@@ -295,7 +296,7 @@ function processMessageElement(messageElement) {
   if (dealResult) {
     // 1. Handle Deal Calculator Rendering
     const badge = document.createElement('div');
-    badge.className = 'wa-helper-deal-calc collapsed';
+    badge.className = settings.defaultCardState === 'expanded' ? 'wa-helper-deal-calc' : 'wa-helper-deal-calc collapsed';
     
     const formattedPrice = formatCurrency(dealResult.price, dealResult.currencyCode);
     const formattedSubtotal = formatCurrency(dealResult.subtotal, dealResult.currencyCode);
@@ -304,10 +305,10 @@ function processMessageElement(messageElement) {
     
     let badgeHTML = `
       <div class="wa-helper-deal-title">
-        <span>📊 Lihat Kalkulasi Deal</span>
-        <span class="wa-helper-deal-toggle-icon">▼</span>
+        <span>${settings.defaultCardState === 'expanded' ? '📊 SMART DEAL CALCULATOR' : '📊 Lihat Kalkulasi Deal'}</span>
+        <span class="wa-helper-deal-toggle-icon">${settings.defaultCardState === 'expanded' ? '▲' : '▼'}</span>
       </div>
-      <div class="wa-helper-deal-body" style="display: none; padding-top: 6px;">
+      <div class="wa-helper-deal-body">
         <div class="wa-helper-deal-row"><span>🛒 Qty × Harga:</span> <span>${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}</span></div>
     `;
     
@@ -346,6 +347,7 @@ function processMessageElement(messageElement) {
     badgeHTML += `
         <div style="text-align: right; margin-top: 8px;">
           <button class="wa-helper-copy-btn" data-copy="${encodeURIComponent(copyData)}">📋 Salin</button>
+          <button class="wa-helper-pdf-btn wa-helper-copy-btn" style="margin-left: 6px;" data-invoice="${encodeURIComponent(JSON.stringify(dealResult))}">📄 PDF</button>
         </div>
       </div>
     `;
@@ -363,12 +365,10 @@ function processMessageElement(messageElement) {
         const isCollapsed = badge.classList.contains('collapsed');
         if (isCollapsed) {
           badge.classList.remove('collapsed');
-          bodyEl.style.display = 'block';
           iconEl.textContent = '▲';
           titleEl.querySelector('span:first-child').textContent = '📊 SMART DEAL CALCULATOR';
         } else {
           badge.classList.add('collapsed');
-          bodyEl.style.display = 'none';
           iconEl.textContent = '▼';
           titleEl.querySelector('span:first-child').textContent = '📊 Lihat Kalkulasi Deal';
         }
@@ -384,6 +384,17 @@ function processMessageElement(messageElement) {
           const originalText = copyBtn.innerHTML;
           copyBtn.innerHTML = '✅ Tersalin';
           setTimeout(() => { copyBtn.innerHTML = originalText; }, 1500);
+        });
+      });
+    }
+    
+    const pdfBtn = badge.querySelector('.wa-helper-pdf-btn');
+    if (pdfBtn) {
+      pdfBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const invoiceData = JSON.parse(decodeURIComponent(pdfBtn.getAttribute('data-invoice')));
+        chrome.storage.local.set({ tempInvoiceData: invoiceData }, () => {
+          chrome.runtime.sendMessage({ action: 'OPEN_INVOICE_TAB' });
         });
       });
     }
@@ -629,7 +640,28 @@ function init() {
     subtree: true
   });
 
-  // Global listener for Ctrl + Alt + T shortcut
+  // Message listener for popup commands
+  chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+    if (request.action === 'EXPAND_ALL') {
+      document.querySelectorAll('.wa-helper-deal-calc').forEach(el => {
+        el.classList.remove('collapsed');
+        const icon = el.querySelector('.wa-helper-deal-toggle-icon');
+        if (icon) icon.textContent = '▲';
+        const title = el.querySelector('.wa-helper-deal-title span:first-child');
+        if (title) title.textContent = '📊 SMART DEAL CALCULATOR';
+      });
+    } else if (request.action === 'COLLAPSE_ALL') {
+      document.querySelectorAll('.wa-helper-deal-calc').forEach(el => {
+        el.classList.add('collapsed');
+        const icon = el.querySelector('.wa-helper-deal-toggle-icon');
+        if (icon) icon.textContent = '▼';
+        const title = el.querySelector('.wa-helper-deal-title span:first-child');
+        if (title) title.textContent = '📊 Lihat Kalkulasi Deal';
+      });
+    }
+  });
+
+  // Global listener for Ctrl + Alt + T and Alt + Shift + E shortcuts
   document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.altKey && e.key.toLowerCase() === 't') {
       const textbox = document.querySelector('div[contenteditable="true"]');
@@ -637,6 +669,29 @@ function init() {
         e.preventDefault();
         translateOutgoingText(textbox);
       }
+    } else if (e.altKey && e.shiftKey && e.key.toLowerCase() === 'e') {
+      e.preventDefault();
+      const allCards = Array.from(document.querySelectorAll('.wa-helper-deal-calc'));
+      if (allCards.length === 0) return;
+      
+      const collapsedCount = allCards.filter(c => c.classList.contains('collapsed')).length;
+      const shouldExpand = collapsedCount >= allCards.length / 2;
+      
+      allCards.forEach(el => {
+        if (shouldExpand) {
+          el.classList.remove('collapsed');
+          const icon = el.querySelector('.wa-helper-deal-toggle-icon');
+          if (icon) icon.textContent = '▲';
+          const title = el.querySelector('.wa-helper-deal-title span:first-child');
+          if (title) title.textContent = '📊 SMART DEAL CALCULATOR';
+        } else {
+          el.classList.add('collapsed');
+          const icon = el.querySelector('.wa-helper-deal-toggle-icon');
+          if (icon) icon.textContent = '▼';
+          const title = el.querySelector('.wa-helper-deal-title span:first-child');
+          if (title) title.textContent = '📊 Lihat Kalkulasi Deal';
+        }
+      });
     }
   });
 

@@ -1,0 +1,131 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f0f2f5;
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+.invoice-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background: white;
+  padding: 40px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.header {
+  text-align: center;
+  border-bottom: 2px solid #008069;
+  padding-bottom: 20px;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  color: #008069;
+  margin: 0;
+  font-size: 28px;
+}
+
+.header p {
+  color: #666;
+  margin: 5px 0 0 0;
+  font-size: 14px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+
+th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+  color: #555;
+}
+
+td.right, th.right {
+  text-align: right;
+}
+
+.totals {
+  width: 100%;
+  max-width: 300px;
+  margin-left: auto;
+}
+
+.totals .row {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  border-bottom: 1px solid #eee;
+}
+
+.totals .row:last-child {
+  border-bottom: none;
+}
+
+.totals .row.grand-total {
+  font-size: 18px;
+  font-weight: bold;
+  color: #008069;
+  border-top: 2px solid #008069;
+  padding-top: 12px;
+  margin-top: 5px;
+}
+
+.totals .row.discount {
+  color: #c62828;
+}
+
+.footer {
+  text-align: center;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px dashed #ddd;
+  font-size: 12px;
+  color: #999;
+}
+
+.actions {
+  text-align: center;
+  margin-top: 30px;
+}
+
+.btn-print {
+  background-color: #008069;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-print:hover {
+  background-color: #005a4e;
+}
+
+/* Hide actions when printing */
+@media print {
+  body {
+    background-color: white;
+    padding: 0;
+  }
+  .invoice-container {
+    box-shadow: none;
+    padding: 0;
+  }
+  .actions {
+    display: none;
+  }
+}

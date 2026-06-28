@@ -28,5 +28,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
       });
       
     return true; // Keep message channel open for asynchronous sendResponse
+  } else if (request.action === 'OPEN_INVOICE_TAB') {
+    chrome.tabs.create({ url: chrome.runtime.getURL('invoice.html') });
+    sendResponse({ success: true });
   }
 });
