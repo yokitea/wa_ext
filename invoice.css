@@ -34,6 +34,18 @@ body {
   font-size: 14px;
 }
 
+.status-badge {
+  display: inline-block;
+  background-color: #fff3e0;
+  color: #e65100;
+  padding: 6px 16px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: bold;
+  margin-top: 15px;
+  border: 1px solid #ffe0b2;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -84,6 +96,21 @@ td.right, th.right {
 
 .totals .row.discount {
   color: #c62828;
+}
+
+.notes-section {
+  background-color: #e3f2fd;
+  padding: 15px;
+  border-left: 4px solid #0288d1;
+  margin-top: 35px;
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  color: #01579b;
+  line-height: 1.5;
+}
+
+.notes-section p {
+  margin: 4px 0;
 }
 
 .footer {
