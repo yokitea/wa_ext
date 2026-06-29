@@ -64,15 +64,29 @@ function renderInvoice(data) {
   `;
 
   if (data.discountAmount > 0) {
-    let discLabel = data.disc1 + '%';
-    if (data.disc2 > 0) discLabel += ' + ' + data.disc2 + '%';
-    
-    totalsHTML += `
-      <div class="row discount">
-        <span>Discount (${discLabel})</span>
-        <span>-${formatCurrencyStr(data.discountAmount, data.currencyCode)}</span>
-      </div>
-    `;
+    if (data.disc2 > 0) {
+      totalsHTML += `
+        <div class="row discount">
+          <span>Discount (${data.disc1}%)</span>
+          <span>-${formatCurrencyStr(data.disc1Amount, data.currencyCode)}</span>
+        </div>
+        <div class="row discount">
+          <span>Discount (${data.disc2}%)</span>
+          <span>-${formatCurrencyStr(data.disc2Amount, data.currencyCode)}</span>
+        </div>
+        <div class="row discount" style="font-weight: 500;">
+          <span>Total Discount</span>
+          <span>-${formatCurrencyStr(data.discountAmount, data.currencyCode)}</span>
+        </div>
+      `;
+    } else {
+      totalsHTML += `
+        <div class="row discount">
+          <span>Discount (${data.disc1}%)</span>
+          <span>-${formatCurrencyStr(data.discountAmount, data.currencyCode)}</span>
+        </div>
+      `;
+    }
   }
   
   if (data.hasTax) {

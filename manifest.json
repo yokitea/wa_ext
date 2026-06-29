@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "WhatsApp Web Helper",
   "version": "1.1.0",
-  "version_name": "1.1.0 Beta 2",
+  "version_name": "1.1.0 Beta 2 Hot fix",
   "description": "Membantu konversi mata uang otomatis dan terjemahan di WhatsApp Web.",
   "permissions": [
     "storage"

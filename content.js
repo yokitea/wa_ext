@@ -238,13 +238,11 @@ function parseDealFormula(text) {
     }
   }
 
-  // Double discount calculation (based on DPP)
+  // Independent discount calculation (based on DPP)
   const disc1Amount = baseSubtotal * (disc1 / 100);
-  const totalAfterDisc1 = baseSubtotal - disc1Amount;
-  const disc2Amount = totalAfterDisc1 * (disc2 / 100);
-  const dpp = totalAfterDisc1 - disc2Amount;
-  
+  const disc2Amount = baseSubtotal * (disc2 / 100);
   const discountAmount = disc1Amount + disc2Amount;
+  const dpp = baseSubtotal - discountAmount;
   
   // Calculate final tax amounts
   let ppnAmount = 0;
@@ -272,6 +270,8 @@ function parseDealFormula(text) {
     price,
     disc1,
     disc2,
+    disc1Amount,
+    disc2Amount,
     discountAmount,
     currencyCode,
     subtotal,
@@ -348,13 +348,21 @@ function processMessageElement(messageElement) {
     `;
     
     if (dealResult.discountAmount > 0) {
-      const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
-      let discLabel = dealResult.disc1 + '%';
-      if (dealResult.disc2 > 0) discLabel += ' + ' + dealResult.disc2 + '%';
-      
-      badgeHTML += `
-        <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${discLabel}:</span> <span>-${formattedDiscount}</span></div>
-      `;
+      if (dealResult.disc2 > 0) {
+        const fmtDisc1 = formatCurrency(dealResult.disc1Amount, dealResult.currencyCode);
+        const fmtDisc2 = formatCurrency(dealResult.disc2Amount, dealResult.currencyCode);
+        const fmtTotalDisc = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+        badgeHTML += `
+          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc1}%:</span> <span>-${fmtDisc1}</span></div>
+          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc2}%:</span> <span>-${fmtDisc2}</span></div>
+          <div class="wa-helper-deal-row discount"><span>🔻 Total Diskon:</span> <span>-${fmtTotalDisc}</span></div>
+        `;
+      } else {
+        const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+        badgeHTML += `
+          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc1}%:</span> <span>-${formattedDiscount}</span></div>
+        `;
+      }
     }
     
     // Tax rows
@@ -383,8 +391,19 @@ function processMessageElement(messageElement) {
       `;
     }
     
-    let copyData = `🛒 Qty × Harga: ${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}` +
-      (dealResult.discountAmount > 0 ? `\n🔻 Diskon ${dealResult.disc1}%${dealResult.disc2 > 0 ? ' + '+dealResult.disc2+'%' : ''}: -${formatCurrency(dealResult.discountAmount, dealResult.currencyCode)}` : '');
+    let copyData = `🛒 Qty × Harga: ${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}`;
+    
+    if (dealResult.discountAmount > 0) {
+      if (dealResult.disc2 > 0) {
+        const fmtDisc1 = formatCurrency(dealResult.disc1Amount, dealResult.currencyCode);
+        const fmtDisc2 = formatCurrency(dealResult.disc2Amount, dealResult.currencyCode);
+        const fmtTotalDisc = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+        copyData += `\n🔻 Diskon ${dealResult.disc1}%: -${fmtDisc1}\n🔻 Diskon ${dealResult.disc2}%: -${fmtDisc2}\n🔻 Total Diskon: -${fmtTotalDisc}`;
+      } else {
+        const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+        copyData += `\n🔻 Diskon ${dealResult.disc1}%: -${formattedDiscount}`;
+      }
+    }
       
     if (dealResult.hasTax) {
       if (dealResult.ppnAmount > 0) copyData += `\n🏛️ PPN (${dealResult.ppnRate}%): +${formatCurrency(dealResult.ppnAmount, dealResult.currencyCode)}`;
