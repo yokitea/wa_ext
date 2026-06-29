@@ -62,14 +62,16 @@ Agar ekstensinya gampang diatur sewaktu-waktu:
 
 ## 📸 Tampilan Ekstensi
 
-![Popup Settings](images/popup.png)
-*(Contoh Tampilan Pengaturan)*
+<details>
+  <summary><b>Klik untuk melihat Screenshot</b></summary>
 
-![Deal Calculator di Chat](images/chat.png)
-*(Contoh Kalkulator di dalam Chat WA)*
+  <img src="screenshot/Screenshot%202026-06-29%20071652.png" width="400" />
+  <img src="screenshot/Screenshot%202026-06-29%20071733.png" width="400" />
+  <img src="screenshot/Screenshot%202026-06-29%20071840.png" width="400" />
+  <img src="screenshot/Screenshot%202026-06-29%20071901.png" width="400" />
+  <img src="screenshot/Screenshot%202026-06-29%20072015.png" width="400" />
 
-![Deal Summary PDF](images/pdf.png)
-*(Contoh Cetak PDF Deal Summary)*
+</details>
 
 ---
 
