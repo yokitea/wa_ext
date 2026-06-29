@@ -155,7 +155,7 @@ function detectCurrencyFromText(text, targetCurrency) {
   if (clean.includes('sgd') || clean.includes('s$')) return 'SGD';
   if (clean.includes('rp') || clean.includes('rupiah')) return 'IDR';
   if (clean.includes('jpy') || clean.includes('yen')) return 'JPY';
-  return 'CNY'; // default fallback for import negotiations
+  return 'IDR'; // default fallback
 }
 
 // Parse text for currency symbols and return formatted translation
