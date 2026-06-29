@@ -201,8 +201,8 @@ function parseAndConvertCurrency(text, targetCurrency) {
 
 // Parse custom deal formulas (e.g. 10 pcs x ¥5.800.000 diskon 10% + 5%)
 function parseDealFormula(text) {
-  // Regex supporting: [qty] [pcs/unit/etc]? [x/×/@] [currency symbol]? [price] [jt/k/m]? [currency symbol]? [diskon/disc]? [discount]% [+ discount2%]?
-  const dealPattern = /(\d+)(?:\s*(?:pcs|pc|item|unit|buah|box|ctn))?\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)\s*(jt|juta|k|rb|ribu|m)?(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang|-)?\s*(\d+)%(?:\s*\+\s*(\d+)%)?)?/i;
+  // Regex supporting: [qty] [pcs/unit/etc]? [x/×/@] [currency symbol]? [price] [jt/k/m/etc]? [currency symbol]? [diskon/disc]? [discount]% [+ discount2%]?
+  const dealPattern = /(\d+)(?:\s*(?:pcs|pc|item|unit|buah|box|ctn))?\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)\s*(jt|juta|k|rb|ribu|m|b|t|milyar|billion|trilyun|triliun|trillion|million)?(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang|-)?\s*(\d+)%(?:\s*\+\s*(\d+)%)?)?/i;
   
   const match = text.match(dealPattern);
   if (!match) return null;
@@ -211,10 +211,26 @@ function parseDealFormula(text) {
   let price = parseSmartFloat(match[3]);
   if (isNaN(price)) return null;
 
-  // Apply suffix multipliers
+  // Apply suffix multipliers based on target language for ambiguous terms
   const suffix = match[4] ? match[4].toLowerCase() : '';
-  if (suffix === 'jt' || suffix === 'juta' || suffix === 'm') price *= 1000000;
-  else if (suffix === 'k' || suffix === 'rb' || suffix === 'ribu') price *= 1000;
+  if (suffix) {
+    if (suffix === 'k' || suffix === 'rb' || suffix === 'ribu') {
+      price *= 1000;
+    } else if (suffix === 'jt' || suffix === 'juta' || suffix === 'million') {
+      price *= 1000000;
+    } else if (suffix === 'milyar' || suffix === 'b' || suffix === 'billion') {
+      price *= 1000000000;
+    } else if (suffix === 't' || suffix === 'trilyun' || suffix === 'triliun' || suffix === 'trillion') {
+      price *= 1000000000000;
+    } else if (suffix === 'm') {
+      // Ambiguous 'm': in Indonesian it's Milyar (10^9), in English/others it's Million (10^6)
+      if (settings.targetLang === 'id' || settings.targetLang === 'su' || settings.targetLang === 'jw' || settings.targetLang === 'ms') {
+        price *= 1000000000;
+      } else {
+        price *= 1000000;
+      }
+    }
+  }
   
   const currencyIndicator = match[2] || match[5] || '';
   const currencyCode = detectCurrencyFromText(currencyIndicator, settings.targetCurrency);
