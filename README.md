@@ -31,7 +31,10 @@ Karena ekstensi ini dirancang khusus dan belum ada di Chrome Web Store, instalas
 1. Buka halaman utama web ini (Github: https://github.com/yokitea/wa_ext).
 2. Cari tombol hijau bertuliskan **"<> Code"** di kanan atas, lalu klik.
 3. Pilih menu **"Download ZIP"**.
-4. Setelah file `.zip` selesai didownload, buka file tersebut dan **Extract (Keluarkan)** foldernya ke tempat yang aman di komputermu (misalnya di folder `Documents` atau `Desktop`). Pastikan kamu ingat di mana kamu menaruh folder hasil ekstrak tersebut!
+4. Setelah file `.zip` selesai didownload, buka file tersebut dan **Extract (Keluarkan)** foldernya ke tempat yang permanen.
+
+> ⚠️ **Penting!** 
+> Folder hasil ekstrak **harus tetap di komputer** dan JANGAN dipindah atau dihapus setelah ekstensi dipasang. Simpan di tempat permanen seperti `Documents/WhatsApp-Extension` atau `Desktop`.
 
 ### Langkah 2: Pasang di Google Chrome
 1. Buka browser **Google Chrome**.
@@ -49,6 +52,24 @@ Agar ekstensinya gampang diatur sewaktu-waktu:
 3. Klik ikon **Pin (📌)** di sebelahnya sampai berubah warna. Ikon ekstensi kini akan selalu terlihat di layar komputermu!
 
 > **Tips Update ke Versi Baru:** Kalau ada versi terbaru di masa depan, cukup tiban/replace folder lama dengan file baru hasil ekstrak yang baru di-download. Lalu buka `chrome://extensions/` dan klik tombol **Reload** (ikon panah melingkar 🔄) pada kotak ekstensi ini.
+
+## ✅ Cara Cek Ekstensi Berhasil Terpasang
+1. Buka `https://web.whatsapp.com`
+2. Buka obrolan bebas, lalu coba ketik pesan: `10 pcs x 100.000 diskon 10%`
+3. Harusnya langsung muncul kartu hijau *Smart Deal Calculator* di bawah pesan tersebut!
+
+---
+
+## 📸 Tampilan Ekstensi
+
+![Popup Settings](images/popup.png)
+*(Contoh Tampilan Pengaturan)*
+
+![Deal Calculator di Chat](images/chat.png)
+*(Contoh Kalkulator di dalam Chat WA)*
+
+![Deal Summary PDF](images/pdf.png)
+*(Contoh Cetak PDF Deal Summary)*
 
 ---
 
@@ -103,6 +124,54 @@ Klik ikon ekstensi di pojok kanan atas browser Chrome kamu untuk membuka menu pe
 - **Mekar Semua / Ciut Semua:** Tombol cepat untuk membuka/menutup seluruh kartu kalkulator secara massal.
 
 Semua pengaturan akan otomatis tersimpan. Cukup *refresh* (F5) tab WhatsApp Web kamu jika ada perubahan yang tidak langsung muncul.
+
+---
+
+## ❓ Troubleshooting & FAQ
+
+**Ekstensi tidak muncul di WhatsApp Web?**
+- Pastikan sudah **reload** ekstensi di `chrome://extensions/` (klik ikon 🔄)
+- Refresh halaman WhatsApp Web (F5)
+- Pastikan folder ekstensi **tidak dipindah atau dihapus**
+
+**Kartu kalkulator tidak muncul?**
+- Cek apakah fitur **"Kalkulator Bisnis"** aktif di popup settings
+- Coba ketik format: `10 pcs x 100.000 diskon 10%`
+- Pastikan tidak ada spasi berlebih atau typo
+
+**Tombol terjemahan (🌐) tidak muncul?**
+- Cek apakah fitur **"Terjemahan Pesan"** aktif di popup settings
+- Refresh WhatsApp Web (F5)
+
+**Ekstensi tiba-tiba hilang setelah restart Chrome?**
+- Pastikan folder ekstensi **tidak berada di Downloads** atau folder sementara
+- Pindahkan folder ke tempat permanen (misal: `Documents/WA_Ext`)
+- Ulangi proses Load Unpacked
+
+---
+
+## 🔒 Keamanan & Privasi
+
+- Ekstensi **tidak mengirim data** ke server manapun (kecuali mengambil data kurs mata uang dan *API translate* resmi Google).
+- Semua kalkulasi deal dilakukan secara **lokal** di browser kamu.
+- Data chat kamu tetap **aman dan privat**, tidak ada isi pesan yang disimpan!
+
+---
+
+## 🤝 Kontribusi & Dukungan
+
+Ekstensi ini open source! Kalau kamu punya ide fitur baru atau menemukan *bug*:
+- Buka issue di [GitHub Issues](https://github.com/yokitea/wa_ext/issues)
+- Atau *fork* repo ini dan kirim *pull request*
+
+**Support:** Kalau ekstensi ini membantu bisnismu closing lebih cepat, traktir kopi ☕ buat developer! 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-☕-yellow)](#)
+
+---
+
+## 📜 Lisensi
+
+MIT License — Bebas digunakan, dimodifikasi, dan didistribusikan secara gratis.
 
 ---
 *Dibuat untuk mempercepat negosiasi impor & bisnis lintas negara! 🍻*
