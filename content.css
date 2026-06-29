@@ -116,6 +116,7 @@ div[data-testid="msg-container"]:hover .wa-helper-translate-btn {
   color: #333333 !important;
   clear: both;
   overflow-x: auto !important; /* Scroll if calculation overflows */
+  white-space: normal !important; /* Prevent WhatsApp's pre-wrap from rendering newlines as spaces */
 }
 
 .wa-helper-deal-calc.collapsed {
