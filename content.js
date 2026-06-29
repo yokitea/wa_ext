@@ -4,6 +4,7 @@ let settings = {
   enableCurrency: true,
   enableDealCalc: true,
   targetCurrency: 'IDR',
+  defaultInputCurrency: 'IDR',
   enableTranslation: true,
   targetLang: 'id'
 };
@@ -41,6 +42,7 @@ function loadSettings() {
     enableCurrency: true,
     enableDealCalc: true,
     targetCurrency: 'IDR',
+    defaultInputCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
     defaultCardState: 'collapsed',
@@ -155,7 +157,7 @@ function detectCurrencyFromText(text, targetCurrency) {
   if (clean.includes('sgd') || clean.includes('s$')) return 'SGD';
   if (clean.includes('rp') || clean.includes('rupiah')) return 'IDR';
   if (clean.includes('jpy') || clean.includes('yen')) return 'JPY';
-  return 'IDR'; // default fallback
+  return settings.defaultInputCurrency || 'IDR'; // default fallback from settings
 }
 
 // Parse text for currency symbols and return formatted translation

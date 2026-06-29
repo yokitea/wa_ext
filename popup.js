@@ -22,6 +22,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Elements
   const enableCurrencyCheckbox = document.getElementById('enable-currency');
   const targetCurrencySelect = document.getElementById('target-currency');
+  const defaultInputCurrencySelect = document.getElementById('default-input-currency');
   const enableDealCalcCheckbox = document.getElementById('enable-deal-calc');
   const defaultCardStateSelect = document.getElementById('default-card-state');
   const enableTranslationCheckbox = document.getElementById('enable-translation');
@@ -56,6 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
     enableDealCalc: true,
     defaultCardState: 'collapsed',
     targetCurrency: 'IDR',
+    defaultInputCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
     enableTax: false,
@@ -83,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
     enableDealCalc: true,
     defaultCardState: 'collapsed',
     targetCurrency: 'IDR',
+    defaultInputCurrency: 'IDR',
     enableTranslation: true,
     targetLang: 'id',
     enableTax: false,
@@ -133,12 +136,20 @@ document.addEventListener('DOMContentLoaded', () => {
   // Render Target Currency Select Options
   function renderCurrencySelect() {
     targetCurrencySelect.innerHTML = '';
+    defaultInputCurrencySelect.innerHTML = '';
+    
     state.customCurrencies.forEach(curr => {
       const opt = document.createElement('option');
       opt.value = curr;
       opt.textContent = `${curr}`;
       if (curr === state.targetCurrency) opt.selected = true;
       targetCurrencySelect.appendChild(opt);
+      
+      const opt2 = document.createElement('option');
+      opt2.value = curr;
+      opt2.textContent = `${curr}`;
+      if (curr === state.defaultInputCurrency) opt2.selected = true;
+      defaultInputCurrencySelect.appendChild(opt2);
     });
   }
 
@@ -201,6 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
       enableDealCalc: enableDealCalcCheckbox.checked,
       defaultCardState: defaultCardStateSelect.value,
       targetCurrency: targetCurrencySelect.value,
+      defaultInputCurrency: defaultInputCurrencySelect.value,
       enableTranslation: enableTranslationCheckbox.checked,
       targetLang: targetLangSelect.value,
       enableTax: enableTaxCheckbox.checked,
@@ -214,6 +226,7 @@ document.addEventListener('DOMContentLoaded', () => {
     state.enableDealCalc = enableDealCalcCheckbox.checked;
     state.defaultCardState = defaultCardStateSelect.value;
     state.targetCurrency = targetCurrencySelect.value;
+    state.defaultInputCurrency = defaultInputCurrencySelect.value;
     state.enableTranslation = enableTranslationCheckbox.checked;
     state.targetLang = targetLangSelect.value;
     state.enableTax = enableTaxCheckbox.checked;
@@ -276,6 +289,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.targetCurrency === curr) {
       state.targetCurrency = state.customCurrencies[0];
     }
+    if (state.defaultInputCurrency === curr) {
+      state.defaultInputCurrency = state.customCurrencies[0];
+    }
     
     saveCompleteState();
     renderAll();
@@ -298,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
   enableDealCalcCheckbox.addEventListener('change', saveActiveSettings);
   defaultCardStateSelect.addEventListener('change', saveActiveSettings);
   targetCurrencySelect.addEventListener('change', saveActiveSettings);
+  defaultInputCurrencySelect.addEventListener('change', saveActiveSettings);
   enableTranslationCheckbox.addEventListener('change', saveActiveSettings);
   targetLangSelect.addEventListener('change', saveActiveSettings);
   
