@@ -18,12 +18,12 @@
   "action": {
     "default_popup": "popup.html",
     "default_title": "DealCalc Settings",
-    "default_icon": "image/DealCalc_FINAL_Ext.png"
+    "default_icon": "image/dealcalc-business.png"
   },
   "icons": {
-    "16": "image/DealCalc_FINAL_Ext.png",
-    "48": "image/DealCalc_FINAL_Ext.png",
-    "128": "image/DealCalc_FINAL_Ext.png"
+    "16": "image/dealcalc-business.png",
+    "48": "image/dealcalc-business.png",
+    "128": "image/dealcalc-business.png"
   },
   "content_scripts": [
     {
