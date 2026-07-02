@@ -18,6 +18,79 @@ const PREDEFINED_LANGUAGES = {
   nl: 'Belanda'
 };
 
+// UI Dictionary
+const langPack = {
+  en: {
+    "header_title": "DealCalc Panel",
+    "manage_list": "Manage List",
+    "currency_title": "Currency Converter",
+    "currency_target": "Target Currency",
+    "currency_input_default": "Default Input (No Symbol)",
+    "calc_title": "Business Calculator (Deal Calc)",
+    "calc_view_default": "Default View",
+    "calc_view_compact": "Compact",
+    "calc_view_expanded": "Expanded",
+    "tax_title": "Tax Calculation (VAT/WHT)",
+    "tax_type": "Tax Type",
+    "tax_exclude": "Exclude (Added on top)",
+    "tax_include": "Include (Tax inclusive)",
+    "tax_ppn": "VAT / PPN (%)",
+    "tax_pph": "WHT / PPh (%) *Deductions",
+    "btn_expand_all": "Expand All",
+    "btn_collapse_all": "Collapse All",
+    "translate_title": "Message Translation",
+    "translate_target": "Target Language",
+    "result_qty_price": "Qty × Price",
+    "result_discount": "Discount",
+    "result_total_discount": "Total Discount",
+    "result_total": "Total",
+    "result_per_pcs": "Per pcs",
+    "btn_copy": "Copy",
+    "btn_pdf": "PDF",
+    "currency_disclaimer": "* Rates are for reference based on ExchangeRate-API, not fixed values."
+  },
+  id: {
+    "header_title": "DealCalc Panel",
+    "manage_list": "Kelola Daftar",
+    "currency_title": "Konversi Mata Uang",
+    "currency_target": "Target Mata Uang",
+    "currency_input_default": "Input Default (Tanpa Simbol)",
+    "calc_title": "Kalkulator Bisnis (Deal Calc)",
+    "calc_view_default": "Tampilan Default",
+    "calc_view_compact": "Ciut (Ringkas)",
+    "calc_view_expanded": "Mekar",
+    "tax_title": "Kalkulasi Pajak (PPN/PPH)",
+    "tax_type": "Tipe Pajak",
+    "tax_exclude": "Exclude (Pajak di luar)",
+    "tax_include": "Include (Pajak di dalam)",
+    "tax_ppn": "PPN (%)",
+    "tax_pph": "PPH (%) *Mengurangi bayaran",
+    "btn_expand_all": "Mekar Semua",
+    "btn_collapse_all": "Ciut Semua",
+    "translate_title": "Terjemahan Pesan",
+    "translate_target": "Target Bahasa",
+    "result_qty_price": "Qty × Harga",
+    "result_discount": "Diskon",
+    "result_total_discount": "Total Diskon",
+    "result_total": "Total",
+    "result_per_pcs": "Per pcs",
+    "btn_copy": "Salin",
+    "btn_pdf": "PDF",
+    "currency_disclaimer": "* Kurs referensi dari ExchangeRate-API, bukan nilai pasti."
+  }
+};
+
+function applyLanguage(lang) {
+  const currentDict = langPack[lang];
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const key = element.getAttribute('data-i18n');
+    if (currentDict[key]) {
+      // Special handling for elements containing other nodes if any, but since we are replacing text nodes:
+      element.textContent = currentDict[key];
+    }
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   // Elements
   const enableCurrencyCheckbox = document.getElementById('enable-currency');
@@ -43,6 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggleManageBtn = document.getElementById('toggle-manage');
   const managePanel = document.getElementById('manage-panel');
   
+  const appLangSelect = document.getElementById('app-lang');
+  
   const currencyBadges = document.getElementById('currency-badges');
   const newCurrencyInput = document.getElementById('new-currency-input');
   const btnAddCurrency = document.getElementById('btn-add-currency');
@@ -53,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // State
   let state = {
+    appLang: 'en',
     enableCurrency: true,
     enableDealCalc: true,
     defaultCardState: 'collapsed',
@@ -76,11 +152,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // Toggle manage section
   toggleManageBtn.addEventListener('click', () => {
     managePanel.classList.toggle('active');
-    toggleManageBtn.textContent = managePanel.classList.contains('active') ? 'Tutup Setelan ❌' : 'Kelola Daftar ⚙️';
+    if (managePanel.classList.contains('active')) {
+      toggleManageBtn.textContent = (state.appLang === 'en' ? 'Close Settings ❌' : 'Tutup Setelan ❌');
+    } else {
+      toggleManageBtn.textContent = langPack[state.appLang]['manage_list'] + ' ⚙️';
+    }
   });
 
   // Load state and render
   chrome.storage.local.get({
+    appLang: 'en',
     enableCurrency: true,
     enableDealCalc: true,
     defaultCardState: 'collapsed',
@@ -101,6 +182,10 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   }, (items) => {
     state = items;
+    
+    // Apply UI Language
+    appLangSelect.value = state.appLang;
+    applyLanguage(state.appLang);
     
     // Set active values
     enableCurrencyCheckbox.checked = state.enableCurrency;
@@ -208,6 +293,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Save active settings to Chrome storage
   function saveActiveSettings() {
     chrome.storage.local.set({
+      appLang: appLangSelect.value,
       enableCurrency: enableCurrencyCheckbox.checked,
       enableDealCalc: enableDealCalcCheckbox.checked,
       defaultCardState: defaultCardStateSelect.value,
@@ -222,6 +308,7 @@ document.addEventListener('DOMContentLoaded', () => {
       taxPph: parseFloat(taxPphInput.value) || 0
     });
     
+    state.appLang = appLangSelect.value;
     state.enableCurrency = enableCurrencyCheckbox.checked;
     state.enableDealCalc = enableDealCalcCheckbox.checked;
     state.defaultCardState = defaultCardStateSelect.value;
@@ -310,6 +397,15 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Event listeners for selects and checkboxes
+  appLangSelect.addEventListener('change', () => {
+    state.appLang = appLangSelect.value;
+    saveActiveSettings();
+    applyLanguage(state.appLang);
+    // Reset toggle text if needed
+    if (!managePanel.classList.contains('active')) {
+      toggleManageBtn.textContent = langPack[state.appLang]['manage_list'] + ' ⚙️';
+    }
+  });
   enableCurrencyCheckbox.addEventListener('change', saveActiveSettings);
   enableDealCalcCheckbox.addEventListener('change', saveActiveSettings);
   defaultCardStateSelect.addEventListener('change', saveActiveSettings);

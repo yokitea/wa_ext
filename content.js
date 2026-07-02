@@ -18,6 +18,26 @@ const fallbackRates = {
   JPY: 160
 };
 
+// Dictionary for Localization
+const DICTIONARY = {
+  en: {
+    discount_split_title: "Discount Splits",
+    discount_1: "Discount 1",
+    discount_2: "Discount 2",
+    discount_3: "Discount 3",
+    base_after_tax: "Base Price (After Tax)",
+    total_discount: "Total Discount"
+  },
+  id: {
+    discount_split_title: "Pembagian Diskon",
+    discount_1: "Diskon 1",
+    discount_2: "Diskon 2",
+    discount_3: "Diskon 3",
+    base_after_tax: "Harga Dasar (Stlh Pajak)",
+    total_discount: "Total Diskon"
+  }
+};
+
 // Fetch exchange rates from free API (non-blocking)
 async function fetchRates() {
   try {
@@ -201,10 +221,10 @@ function parseAndConvertCurrency(text, targetCurrency) {
   return results;
 }
 
-// Parse custom deal formulas (e.g. 10 pcs x ¥5.800.000 diskon 10% + 5%)
+// Parse custom deal formulas (e.g. 10 pcs x ¥5.800.000 diskon 10% + 5% + 2%)
 function parseDealFormula(text) {
-  // Regex supporting: [qty] [pcs/unit/etc]? [x/×/@] [currency symbol]? [price] [jt/k/m/etc]? [currency symbol]? [diskon/disc]? [discount]% [+ discount2%]?
-  const dealPattern = /(\d+)(?:\s*(?:pcs|pc|item|unit|buah|box|ctn))?\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)\s*(jt|juta|k|rb|ribu|m|b|t|milyar|billion|trilyun|triliun|trillion|million)?(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang|-)?\s*(\d+)%(?:\s*\+\s*(\d+)%)?)?/i;
+  // Regex supporting up to 3 discounts
+  const dealPattern = /(\d+)(?:\s*(?:pcs|pc|item|unit|buah|box|ctn))?\s*[x×@]\s*(?:(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$)\s*)?([\d.,]+)\s*(jt|juta|k|rb|ribu|m|b|t|milyar|billion|trilyun|triliun|trillion|million)?(?:\s*(¥|\$|usd|eur|sgd|cny|rmb|rp|rupiah|jpy|yen|s\$))?(?:\s*(?:diskon|disc|off|potongan|minus|kurang|-)?\s*(\d+)%(?:\s*\+\s*(\d+)%)?(?:\s*\+\s*(\d+)%)?)?/i;
   
   const match = text.match(dealPattern);
   if (!match) return null;
@@ -225,7 +245,6 @@ function parseDealFormula(text) {
     } else if (suffix === 't' || suffix === 'trilyun' || suffix === 'triliun' || suffix === 'trillion') {
       price *= 1000000000000;
     } else if (suffix === 'm') {
-      // Ambiguous 'm': in Indonesian it's Milyar (10^9), in English/others it's Million (10^6)
       if (settings.targetLang === 'id' || settings.targetLang === 'su' || settings.targetLang === 'jw' || settings.targetLang === 'ms') {
         price *= 1000000000;
       } else {
@@ -239,38 +258,68 @@ function parseDealFormula(text) {
   
   const disc1 = match[6] ? parseInt(match[6]) : 0;
   const disc2 = match[7] ? parseInt(match[7]) : 0;
+  const disc3 = match[8] ? parseInt(match[8]) : 0;
   
-  const subtotal = qty * price;
-  
-  // Tax logic
-  let ppnRate = settings.enableTax ? (parseFloat(settings.taxPpn) / 100) : 0;
-  let pphRate = settings.enableTax ? (parseFloat(settings.taxPph) / 100) : 0;
-
-  let baseSubtotal = subtotal; // DPP before discount
-  if (settings.enableTax && settings.taxType === 'include') {
-    if (settings.taxMethod === 'lapangan') {
-      baseSubtotal = subtotal - (subtotal * ppnRate) - (subtotal * pphRate);
-    } else {
-      // Akuntansi
-      baseSubtotal = subtotal / (1 + ppnRate); 
+  // Parse Ongkir (Shipping)
+  const ongkirRegex = /(?:ongkir|onglir|ongkor|ongkur|ongkos|ongkos kirim|shipping)\s*(?:(?:rp|\$|€|¥|£|s\$)\s*)?([\d.,]+)\s*(jt|juta|k|rb|ribu|m|b|t|milyar|billion|trilyun|triliun|trillion|million)?/i;
+  const ongkirMatch = text.match(ongkirRegex);
+  let ongkirAmount = 0;
+  if (ongkirMatch) {
+    let rawOngkir = parseSmartFloat(ongkirMatch[1]);
+    if (!isNaN(rawOngkir)) {
+      const suffix = ongkirMatch[2] ? ongkirMatch[2].toLowerCase() : '';
+      if (suffix) {
+        if (suffix === 'k' || suffix === 'rb' || suffix === 'ribu') rawOngkir *= 1000;
+        else if (suffix === 'jt' || suffix === 'juta' || suffix === 'million') rawOngkir *= 1000000;
+        else if (suffix === 'milyar' || suffix === 'b' || suffix === 'billion') rawOngkir *= 1000000000;
+        else if (suffix === 't' || suffix === 'trilyun' || suffix === 'triliun' || suffix === 'trillion') rawOngkir *= 1000000000000;
+        else if (suffix === 'm') {
+          if (settings.targetLang === 'id' || settings.targetLang === 'su' || settings.targetLang === 'jw' || settings.targetLang === 'ms') rawOngkir *= 1000000000;
+          else rawOngkir *= 1000000;
+        }
+      }
+      ongkirAmount = rawOngkir;
     }
   }
 
-  // Independent discount calculation (based on DPP)
-  const disc1Amount = baseSubtotal * (disc1 / 100);
-  const disc2Amount = baseSubtotal * (disc2 / 100);
-  const discountAmount = disc1Amount + disc2Amount;
-  const dpp = baseSubtotal - discountAmount;
+  const subtotal = qty * price;
   
-  // Calculate final tax amounts
+  // Tax logic (Tax before discount for Mediator/Project scenario)
+  let ppnRate = settings.enableTax ? (parseFloat(settings.taxPpn) / 100) : 0;
+  let pphRate = settings.enableTax ? (parseFloat(settings.taxPph) / 100) : 0;
+
   let ppnAmount = 0;
   let pphAmount = 0;
+  let baseAfterTax = subtotal;
+
   if (settings.enableTax) {
-    ppnAmount = dpp * ppnRate;
-    pphAmount = dpp * pphRate;
+    if (settings.taxType === 'include') {
+      if (settings.taxMethod === 'lapangan') {
+        ppnAmount = subtotal * ppnRate;
+        pphAmount = subtotal * pphRate;
+        baseAfterTax = subtotal - ppnAmount - pphAmount;
+      } else {
+        // Akuntansi
+        baseAfterTax = subtotal / (1 + ppnRate); 
+        ppnAmount = subtotal - baseAfterTax;
+        pphAmount = baseAfterTax * pphRate;
+        baseAfterTax = baseAfterTax - pphAmount;
+      }
+    } else {
+      // Exclude
+      ppnAmount = subtotal * ppnRate;
+      pphAmount = subtotal * pphRate;
+      baseAfterTax = subtotal - pphAmount; // PPN is added on top, doesn't reduce base
+    }
   }
+
+  // Independent discount calculation (based on baseAfterTax)
+  const disc1Amount = baseAfterTax * (disc1 / 100);
+  const disc2Amount = baseAfterTax * (disc2 / 100);
+  const disc3Amount = baseAfterTax * (disc3 / 100);
+  const discountAmount = disc1Amount + disc2Amount + disc3Amount;
   
-  const total = dpp + ppnAmount - pphAmount;
+  const total = subtotal - discountAmount + (settings.taxType === 'exclude' ? ppnAmount : 0) - pphAmount + ongkirAmount;
   const pricePerUnit = total / qty;
   
   let convertedTotal = null;
@@ -288,12 +337,15 @@ function parseDealFormula(text) {
     price,
     disc1,
     disc2,
+    disc3,
     disc1Amount,
     disc2Amount,
+    disc3Amount,
     discountAmount,
+    ongkirAmount,
     currencyCode,
     subtotal,
-    dpp,
+    baseAfterTax,
     ppnAmount,
     pphAmount,
     ppnRate: settings.taxPpn,
@@ -365,23 +417,8 @@ function processMessageElement(messageElement) {
         <div class="wa-helper-deal-row"><span>🛒 Qty × Harga:</span> <span>${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}</span></div>
     `;
     
-    if (dealResult.discountAmount > 0) {
-      if (dealResult.disc2 > 0) {
-        const fmtDisc1 = formatCurrency(dealResult.disc1Amount, dealResult.currencyCode);
-        const fmtDisc2 = formatCurrency(dealResult.disc2Amount, dealResult.currencyCode);
-        const fmtTotalDisc = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
-        badgeHTML += `
-          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc1}%:</span> <span>-${fmtDisc1}</span></div>
-          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc2}%:</span> <span>-${fmtDisc2}</span></div>
-          <div class="wa-helper-deal-row discount"><span>🔻 Total Diskon:</span> <span>-${fmtTotalDisc}</span></div>
-        `;
-      } else {
-        const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
-        badgeHTML += `
-          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc1}%:</span> <span>-${formattedDiscount}</span></div>
-        `;
-      }
-    }
+    const tLang = settings.targetLang === 'id' || settings.targetLang === 'su' || settings.targetLang === 'ms' ? 'id' : 'en';
+    const dict = DICTIONARY[tLang] || DICTIONARY['en'];
     
     // Tax rows
     if (dealResult.hasTax) {
@@ -391,10 +428,49 @@ function processMessageElement(messageElement) {
       if (dealResult.pphAmount > 0) {
         badgeHTML += `<div class="wa-helper-deal-row" style="color:#d32f2f;"><span>🏛️ PPH (${dealResult.pphRate}%):</span> <span>-${formatCurrency(dealResult.pphAmount, dealResult.currencyCode)}</span></div>`;
       }
+      
+      const fmtBase = formatCurrency(dealResult.baseAfterTax, dealResult.currencyCode);
+      badgeHTML += `<div class="wa-helper-deal-row" style="color:#555; border-top:1px solid #eee; padding-top:4px; margin-top:4px;"><span>${dict.base_after_tax}:</span> <span>${fmtBase}</span></div>`;
+    }
+    
+    if (dealResult.discountAmount > 0) {
+      if (dealResult.disc2 > 0 || dealResult.disc3 > 0) {
+        badgeHTML += `<div class="wa-helper-deal-row" style="font-weight:bold; font-size: 11px; margin-top:4px;">${dict.discount_split_title}:</div>`;
+        const fmtDisc1 = formatCurrency(dealResult.disc1Amount, dealResult.currencyCode);
+        badgeHTML += `<div class="wa-helper-deal-row discount"><span>🔻 ${dict.discount_1} (${dealResult.disc1}%):</span> <span>-${fmtDisc1}</span></div>`;
+        
+        if (dealResult.disc2 > 0) {
+          const fmtDisc2 = formatCurrency(dealResult.disc2Amount, dealResult.currencyCode);
+          badgeHTML += `<div class="wa-helper-deal-row discount"><span>🔻 ${dict.discount_2} (${dealResult.disc2}%):</span> <span>-${fmtDisc2}</span></div>`;
+        }
+        
+        if (dealResult.disc3 > 0) {
+          const fmtDisc3 = formatCurrency(dealResult.disc3Amount, dealResult.currencyCode);
+          badgeHTML += `<div class="wa-helper-deal-row discount"><span>🔻 ${dict.discount_3} (${dealResult.disc3}%):</span> <span>-${fmtDisc3}</span></div>`;
+        }
+        
+        const fmtTotalDisc = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+        badgeHTML += `<div class="wa-helper-deal-row discount" style="border-top:1px dashed rgba(0,0,0,0.1); padding-top:2px; margin-top:2px;"><span>🔻 ${dict.total_discount}:</span> <span>-${fmtTotalDisc}</span></div>`;
+      } else {
+        const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
+        badgeHTML += `
+          <div class="wa-helper-deal-row discount"><span>🔻 Diskon ${dealResult.disc1}%:</span> <span>-${formattedDiscount}</span></div>
+        `;
+      }
+    }
+    
+    if (dealResult.ongkirAmount > 0) {
+      badgeHTML += `
+        <div class="wa-helper-deal-row" style="border-top:1px dashed rgba(0,0,0,0.1); padding-top:2px; margin-top:2px; color: #555;">
+          <span>🚚 Ongkir:</span> <span>+${formatCurrency(dealResult.ongkirAmount, dealResult.currencyCode)}</span>
+        </div>
+      `;
     }
     
     badgeHTML += `
-        <div class="wa-helper-deal-row total"><span>💰 Total:</span> <span>${formattedTotal}</span></div>
+        <div class="wa-helper-deal-row total" style="border-top: 2px solid rgba(0,0,0,0.1); padding-top: 4px; margin-top: 4px;">
+          <span>💰 Total:</span> <span>${formattedTotal}</span>
+        </div>
         <div class="wa-helper-deal-row"><span>💳 Per pcs:</span> <span>${formattedPerUnit}</span></div>
     `;
     
@@ -411,21 +487,26 @@ function processMessageElement(messageElement) {
     
     let copyData = `🛒 Qty × Harga: ${dealResult.qty} pcs × ${formattedPrice} = ${formattedSubtotal}`;
     
-    if (dealResult.discountAmount > 0) {
-      if (dealResult.disc2 > 0) {
-        const fmtDisc1 = formatCurrency(dealResult.disc1Amount, dealResult.currencyCode);
-        const fmtDisc2 = formatCurrency(dealResult.disc2Amount, dealResult.currencyCode);
-        const fmtTotalDisc = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
-        copyData += `\n🔻 Diskon ${dealResult.disc1}%: -${fmtDisc1}\n🔻 Diskon ${dealResult.disc2}%: -${fmtDisc2}\n🔻 Total Diskon: -${fmtTotalDisc}`;
-      } else {
-        const formattedDiscount = formatCurrency(dealResult.discountAmount, dealResult.currencyCode);
-        copyData += `\n🔻 Diskon ${dealResult.disc1}%: -${formattedDiscount}`;
-      }
-    }
-      
     if (dealResult.hasTax) {
       if (dealResult.ppnAmount > 0) copyData += `\n🏛️ PPN (${dealResult.ppnRate}%): +${formatCurrency(dealResult.ppnAmount, dealResult.currencyCode)}`;
       if (dealResult.pphAmount > 0) copyData += `\n🏛️ PPH (${dealResult.pphRate}%): -${formatCurrency(dealResult.pphAmount, dealResult.currencyCode)}`;
+      copyData += `\n--- ${dict.base_after_tax}: ${formatCurrency(dealResult.baseAfterTax, dealResult.currencyCode)} ---`;
+    }
+    
+    if (dealResult.discountAmount > 0) {
+      if (dealResult.disc2 > 0 || dealResult.disc3 > 0) {
+        copyData += `\n-- ${dict.discount_split_title} --`;
+        copyData += `\n🔻 ${dict.discount_1} (${dealResult.disc1}%): -${formatCurrency(dealResult.disc1Amount, dealResult.currencyCode)}`;
+        if (dealResult.disc2 > 0) copyData += `\n🔻 ${dict.discount_2} (${dealResult.disc2}%): -${formatCurrency(dealResult.disc2Amount, dealResult.currencyCode)}`;
+        if (dealResult.disc3 > 0) copyData += `\n🔻 ${dict.discount_3} (${dealResult.disc3}%): -${formatCurrency(dealResult.disc3Amount, dealResult.currencyCode)}`;
+        copyData += `\n🔻 ${dict.total_discount}: -${formatCurrency(dealResult.discountAmount, dealResult.currencyCode)}`;
+      } else {
+        copyData += `\n🔻 Diskon ${dealResult.disc1}%: -${formatCurrency(dealResult.discountAmount, dealResult.currencyCode)}`;
+      }
+    }
+    
+    if (dealResult.ongkirAmount > 0) {
+      copyData += `\n🚚 Ongkir: +${formatCurrency(dealResult.ongkirAmount, dealResult.currencyCode)}`;
     }
       
     copyData += `\n💰 Total: ${formattedTotal}` +

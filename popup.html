@@ -179,47 +179,56 @@
   </style>
 </head>
 <body>
-  <h3>
-    <span>WA Web Helper</span>
-    <button class="btn-toggle-manage" id="toggle-manage">Kelola Daftar ⚙️</button>
+  <h3 style="display: flex; justify-content: space-between; align-items: center; padding-bottom: 8px; margin-bottom: 15px;">
+    <span data-i18n="header_title">DealCalc Panel</span>
+    <div style="display: flex; align-items: center;">
+      <select id="app-lang" style="font-size: 10px; padding: 2px 4px; border-radius: 4px; margin-right: 8px; border: 1px solid #005a4e; color: #005a4e;">
+        <option value="en">EN</option>
+        <option value="id">ID</option>
+      </select>
+      <button class="btn-toggle-manage" id="toggle-manage" data-i18n="manage_list">Kelola Daftar</button>
+    </div>
   </h3>
   
   <!-- Main Settings -->
   <div class="setting-group">
     <div class="setting-row">
-      <label for="enable-currency">Konversi Mata Uang</label>
+      <label for="enable-currency" data-i18n="currency_title">Konversi Mata Uang</label>
       <label class="switch">
         <input type="checkbox" id="enable-currency" checked>
         <span class="slider"></span>
       </label>
     </div>
     <div class="setting-row">
-      <label for="target-currency">Target Mata Uang</label>
+      <label for="target-currency" data-i18n="currency_target">Target Mata Uang</label>
       <select id="target-currency">
         <!-- Will be loaded dynamically -->
       </select>
     </div>
     <div class="setting-row" style="margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;">
-      <label for="default-input-currency">Input Default (Tanpa Simbol)</label>
+      <label for="default-input-currency" data-i18n="currency_input_default">Input Default (Tanpa Simbol)</label>
       <select id="default-input-currency">
         <!-- Will be loaded dynamically -->
       </select>
+    </div>
+    <div style="font-size: 10px; color: #667781; text-align: right; margin-top: 6px; font-style: italic;" data-i18n="currency_disclaimer">
+      * Kurs referensi dari ExchangeRate-API, bukan nilai pasti.
     </div>
   </div>
 
   <div class="setting-group">
     <div class="setting-row">
-      <label for="enable-deal-calc">Kalkulator Bisnis (Deal Calc)</label>
+      <label for="enable-deal-calc" data-i18n="calc_title">Kalkulator Bisnis (Deal Calc)</label>
       <label class="switch">
         <input type="checkbox" id="enable-deal-calc" checked>
         <span class="slider"></span>
       </label>
     </div>
     <div class="setting-row" style="margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;">
-      <label for="default-card-state">Tampilan Default</label>
+      <label for="default-card-state" data-i18n="calc_view_default">Tampilan Default</label>
       <select id="default-card-state">
-        <option value="collapsed">Ciut (Ringkas)</option>
-        <option value="expanded">Mekar (Detail)</option>
+        <option value="collapsed" data-i18n="calc_view_compact">Ciut (Ringkas)</option>
+        <option value="expanded" data-i18n="calc_view_expanded">Mekar</option>
       </select>
     </div>
   </div>
@@ -227,7 +236,7 @@
   <!-- Pajak (Tax) Settings -->
   <div class="setting-group">
     <div class="setting-row">
-      <label for="enable-tax">Kalkulasi Pajak (PPN/PPH)</label>
+      <label for="enable-tax" data-i18n="tax_title">Kalkulasi Pajak (PPN/PPH)</label>
       <label class="switch">
         <input type="checkbox" id="enable-tax">
         <span class="slider"></span>
@@ -236,10 +245,10 @@
     
     <div id="tax-options" style="display: none; margin-top: 8px; border-top: 1px dashed #eee; padding-top: 8px;">
       <div class="setting-row">
-        <label for="tax-type" style="font-size: 11px;">Tipe Pajak</label>
+        <label for="tax-type" style="font-size: 11px;" data-i18n="tax_type">Tipe Pajak</label>
         <select id="tax-type" style="max-width: 140px;">
-          <option value="exclude">Exclude (Pajak di luar)</option>
-          <option value="include">Include (Pajak di dalam)</option>
+          <option value="exclude" data-i18n="tax_exclude">Exclude (Pajak di luar)</option>
+          <option value="include" data-i18n="tax_include">Include (Pajak di dalam)</option>
         </select>
       </div>
       
@@ -252,31 +261,31 @@
       </div>
 
       <div class="setting-row" style="margin-top: 6px;">
-        <label for="tax-ppn" style="font-size: 11px;">PPN (%)</label>
+        <label for="tax-ppn" style="font-size: 11px;" data-i18n="tax_ppn">PPN (%)</label>
         <input type="number" id="tax-ppn" min="0" max="100" step="0.1" style="width: 50px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 11px;">
       </div>
       <div class="setting-row" style="margin-top: 6px;">
-        <label for="tax-pph" style="font-size: 11px;">PPH (%) <span style="color:#888; font-size:9px;">*Mengurangi bayaran</span></label>
+        <label for="tax-pph" style="font-size: 11px;" data-i18n="tax_pph">PPH (%) *Mengurangi bayaran</label>
         <input type="number" id="tax-pph" min="0" max="100" step="0.1" style="width: 50px; padding: 4px; border: 1px solid #ccc; border-radius: 4px; font-size: 11px;">
       </div>
     </div>
   </div>
 
   <div class="setting-group" style="display: flex; gap: 8px; justify-content: space-between;">
-    <button id="btn-expand-all" style="flex:1; padding: 6px; background: #008069; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Mekar Semua</button>
-    <button id="btn-collapse-all" style="flex:1; padding: 6px; background: #e0e0e0; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;">Ciut Semua</button>
+    <button id="btn-expand-all" style="flex:1; padding: 6px; background: #008069; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;" data-i18n="btn_expand_all">Mekar Semua</button>
+    <button id="btn-collapse-all" style="flex:1; padding: 6px; background: #e0e0e0; color: #333; border: none; border-radius: 4px; cursor: pointer; font-size: 11px;" data-i18n="btn_collapse_all">Ciut Semua</button>
   </div>
 
   <div class="setting-group">
     <div class="setting-row">
-      <label for="enable-translation">Terjemahan Pesan</label>
+      <label for="enable-translation" data-i18n="translate_title">Terjemahan Pesan</label>
       <label class="switch">
         <input type="checkbox" id="enable-translation" checked>
         <span class="slider"></span>
       </label>
     </div>
     <div class="setting-row">
-      <label for="target-lang">Target Bahasa</label>
+      <label for="target-lang" data-i18n="translate_target">Target Bahasa</label>
       <select id="target-lang">
         <!-- Will be loaded dynamically -->
       </select>
@@ -326,7 +335,7 @@
   </div>
 
   <div class="footer">
-    WhatsApp Web Helper v1.1 Beta 3 • Super Customizable
+    DealCalc v1.1 RC • Super Customizable
   </div>
 
   <script src="popup.js"></script>

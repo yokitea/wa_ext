@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "WhatsApp Web Helper",
+  "name": "DealCalc",
   "version": "1.1.0",
-  "version_name": "1.1.0 Beta 3",
-  "description": "Membantu konversi mata uang otomatis dan terjemahan di WhatsApp Web.",
+  "version_name": "1.1.0 RC",
+  "description": "Smart Business Calculator and Currency Converter for WhatsApp Web.",
   "permissions": [
     "storage"
   ],
@@ -17,7 +17,13 @@
   ],
   "action": {
     "default_popup": "popup.html",
-    "default_title": "WA Web Helper Settings"
+    "default_title": "DealCalc Settings",
+    "default_icon": "image/DealCalc_FINAL_Ext.png"
+  },
+  "icons": {
+    "16": "image/DealCalc_FINAL_Ext.png",
+    "48": "image/DealCalc_FINAL_Ext.png",
+    "128": "image/DealCalc_FINAL_Ext.png"
   },
   "content_scripts": [
     {
