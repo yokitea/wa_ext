@@ -410,7 +410,7 @@ function processMessageElement(messageElement) {
     
     let badgeHTML = `
       <div class="wa-helper-deal-title">
-        <span>${settings.defaultCardState === 'expanded' ? '📊 SMART DEAL CALCULATOR' : '📊 Lihat Kalkulasi Deal'}</span>
+        <span><img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">${settings.defaultCardState === 'expanded' ? 'SMART DEAL CALCULATOR' : 'Lihat Kalkulasi Deal'}</span>
         <span class="wa-helper-deal-toggle-icon">${settings.defaultCardState === 'expanded' ? '▲' : '▼'}</span>
       </div>
       <div class="wa-helper-deal-body">
@@ -535,11 +535,11 @@ function processMessageElement(messageElement) {
         if (isCollapsed) {
           badge.classList.remove('collapsed');
           iconEl.textContent = '▲';
-          titleEl.querySelector('span:first-child').textContent = '📊 SMART DEAL CALCULATOR';
+          titleEl.querySelector('span:first-child').innerHTML = `<img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">SMART DEAL CALCULATOR`;
         } else {
           badge.classList.add('collapsed');
           iconEl.textContent = '▼';
-          titleEl.querySelector('span:first-child').textContent = '📊 Lihat Kalkulasi Deal';
+          titleEl.querySelector('span:first-child').innerHTML = `<img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">Lihat Kalkulasi Deal`;
         }
       });
     }
@@ -817,7 +817,7 @@ function init() {
         const icon = el.querySelector('.wa-helper-deal-toggle-icon');
         if (icon) icon.textContent = '▲';
         const title = el.querySelector('.wa-helper-deal-title span:first-child');
-        if (title) title.textContent = '📊 SMART DEAL CALCULATOR';
+        if (title) title.innerHTML = `<img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">SMART DEAL CALCULATOR`;
       });
     } else if (request.action === 'COLLAPSE_ALL') {
       document.querySelectorAll('.wa-helper-deal-calc').forEach(el => {
@@ -825,7 +825,7 @@ function init() {
         const icon = el.querySelector('.wa-helper-deal-toggle-icon');
         if (icon) icon.textContent = '▼';
         const title = el.querySelector('.wa-helper-deal-title span:first-child');
-        if (title) title.textContent = '📊 Lihat Kalkulasi Deal';
+        if (title) title.innerHTML = `<img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">Lihat Kalkulasi Deal`;
       });
     }
   });
@@ -852,13 +852,13 @@ function init() {
           const icon = el.querySelector('.wa-helper-deal-toggle-icon');
           if (icon) icon.textContent = '▲';
           const title = el.querySelector('.wa-helper-deal-title span:first-child');
-          if (title) title.textContent = '📊 SMART DEAL CALCULATOR';
+          if (title) title.innerHTML = `<img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">SMART DEAL CALCULATOR`;
         } else {
           el.classList.add('collapsed');
           const icon = el.querySelector('.wa-helper-deal-toggle-icon');
           if (icon) icon.textContent = '▼';
           const title = el.querySelector('.wa-helper-deal-title span:first-child');
-          if (title) title.textContent = '📊 Lihat Kalkulasi Deal';
+          if (title) title.innerHTML = `<img src="${chrome.runtime.getURL('image/dealcalc-business.svg')}" width="16" height="16" style="vertical-align: sub; margin-right: 4px;">Lihat Kalkulasi Deal`;
         }
       });
     }
